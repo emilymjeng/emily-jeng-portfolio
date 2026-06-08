@@ -1,0 +1,2994 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Voxbee — emily jeng case study</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
+<link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    /* Warm cream Voxbee theme, calibrated to feel like the existing site
+       (Albert Sans, soft ink, soft motion) but flavoured for the brand. */
+    --bg: #ffffff;
+    --bg-soft: #ffffff;
+    --bg-mint: #e9f4ef;
+    --surface: #ffffff;
+    --ink: #1a1a18;
+    --ink-soft: #6b6b66;
+    --ink-faint: #b8b8b2;
+    --line: rgba(26, 26, 24, 0.08);
+
+    /* Voxbee brand (from the original site) */
+    --brand: #00a986;
+    --brand-deep: #137459;
+    --brand-mint: #c8eadf;
+    --brand-pink: #fc7fa3;
+
+    --chip: rgba(28, 38, 34, 0.05);
+    --chip-ink: #5a625c;
+    --nav-glass: rgba(255, 255, 255, 0.55);
+    --nav-glass-border: rgba(255, 255, 255, 0.7);
+    --nav-active-bg: #ffffff;
+    --nav-active-ink: #1c2622;
+    --shadow-color: 28, 38, 34;
+  }
+  body.dark {
+    --bg: #0f1311;
+    --bg-soft: #161b18;
+    --bg-mint: #14201b;
+    --surface: #1a1f1c;
+    --ink: #ebe9df;
+    --ink-soft: #9aa097;
+    --ink-faint: #565b55;
+    --line: rgba(235, 233, 223, 0.08);
+    --chip: rgba(235, 233, 223, 0.06);
+    --chip-ink: #b8bdb4;
+    --nav-glass: rgba(28, 28, 26, 0.55);
+    --nav-glass-border: rgba(255, 255, 255, 0.07);
+    --nav-active-bg: #ffffff;
+    --nav-active-ink: #1c2622;
+    --shadow-color: 0, 0, 0;
+
+    --brand: #2dc8a6;
+    --brand-deep: #6cdcbf;
+    --brand-mint: #1a4239;
+    --brand-pink: #ffa3bf;
+  }
+
+  * { box-sizing: border-box; }
+
+  @keyframes flyIn {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fly-in {
+    opacity: 0;
+    animation: flyIn 0.7s cubic-bezier(.2,.8,.2,1) var(--fly-delay, 0s) both;
+  }
+
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Albert Sans', system-ui, sans-serif;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    transition: background 0.4s ease, color 0.4s ease;
+  }
+  body { min-height: 100vh; overflow-x: hidden; }
+
+  /* Custom cursor */
+  @media (hover: hover) and (pointer: fine) {
+    * { cursor: none !important; }
+    .cursor {
+      position: fixed; top: 0; left: 0;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: rgba(160, 160, 160, 0.18);
+      border: 1px solid rgba(120, 120, 120, 0.42);
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate3d(-50px, -50px, 0) translate(-50%, -50%);
+      transition: opacity 0.3s ease;
+      will-change: transform;
+    }
+    body.dark .cursor {
+      background: rgba(220, 220, 220, 0.10);
+      border-color: rgba(220, 220, 220, 0.38);
+    }
+    .cursor.hidden { opacity: 0; }
+  }
+  @media not all and (hover: hover), not all and (pointer: fine) {
+    .cursor { display: none; }
+  }
+
+  /* ─── Top bar (shared chrome from the rest of the site) ─────── */
+  .topbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 110px;
+    z-index: 50;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 96px;
+  }
+  .logo {
+    pointer-events: auto;
+    width: 62px; height: 62px;
+    display: block;
+    will-change: transform;
+    position: relative;
+  }
+  .logo img {
+    width: 100%; height: 100%;
+    display: block; object-fit: contain; object-position: center;
+    transform: rotate(var(--scroll-rot, 0deg)) scale(1);
+    transition: transform 0.5s cubic-bezier(.3,1.4,.4,1);
+    will-change: transform;
+  }
+  .logo:hover img {
+    transform: rotate(calc(var(--scroll-rot, 0deg) + 14deg)) scale(1.08);
+  }
+  .logo-tip {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%) translateY(-6px);
+    background: #e9e8e2;
+    color: #4a4a45;
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: -0.005em;
+    white-space: nowrap;
+    padding: 7px 12px;
+    border-radius: 10px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.35s cubic-bezier(.3,1.4,.4,1);
+    box-shadow: 0 8px 22px -8px rgba(0,0,0,0.18);
+    z-index: 60;
+  }
+  body.dark .logo-tip {
+    background: #2a2a27;
+    color: #c2c1b8;
+  }
+  .logo-tip::before {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-bottom-color: #e9e8e2;
+  }
+  body.dark .logo-tip::before {
+    border-bottom-color: #2a2a27;
+  }
+  .logo.spinning .logo-tip {
+    opacity: 0 !important;
+    transform: translateX(-50%) translateY(-6px) !important;
+  }
+  .logo:hover .logo-tip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .nav {
+    pointer-events: auto;
+    display: flex; align-items: center; gap: 2px;
+    padding: 6px;
+    border-radius: 999px;
+    background: var(--nav-glass);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    border: 1px solid var(--nav-glass-border);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.6) inset,
+      0 0 0 1px rgba(28, 38, 34, 0.04),
+      0 10px 30px -10px rgba(28, 38, 34, 0.12),
+      0 4px 12px -4px rgba(28, 38, 34, 0.06);
+    transition: background 0.4s ease, border-color 0.4s ease;
+    position: relative;
+    isolation: isolate;
+  }
+  .nav-pill {
+    position: absolute; z-index: 0;
+    border-radius: 999px;
+    background: var(--nav-active-bg);
+    box-shadow:
+      0 0 0 1px rgba(28, 38, 34, 0.05),
+      0 4px 10px -4px rgba(28, 38, 34, 0.15);
+    transition:
+      left 0.5s cubic-bezier(.5, 1.3, .3, 1),
+      top  0.5s cubic-bezier(.5, 1.3, .3, 1),
+      width 0.5s cubic-bezier(.5, 1.3, .3, 1),
+      height 0.5s cubic-bezier(.5, 1.3, .3, 1),
+      opacity 0.3s ease;
+    pointer-events: none;
+  }
+  .nav-pill.hidden { opacity: 0; }
+  .nav a {
+    text-decoration: none;
+    color: var(--ink);
+    font-size: 15px; font-weight: 400;
+    letter-spacing: -0.005em;
+    padding: 9px 18px;
+    border-radius: 999px;
+    transition: color 0.2s ease;
+    display: inline-flex; align-items: center; gap: 5px;
+    position: relative; z-index: 1;
+    background: transparent;
+  }
+  .nav a:not(.active):hover { background: rgba(28, 38, 34, 0.06); }
+  body.dark .nav a:not(.active):hover { background: rgba(255, 255, 255, 0.08); }
+  .nav a.active { color: var(--nav-active-ink); }
+  .nav a.external::after {
+    content: "↗"; font-size: 12px; opacity: 0.55; margin-left: 1px;
+  }
+  .theme-toggle {
+    appearance: none; border: none; background: transparent; cursor: pointer;
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    perspective: 600px;
+    padding: 0; margin-left: 4px;
+    color: var(--ink);
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .theme-toggle:hover { background: rgba(28, 38, 34, 0.06); }
+  body.dark .theme-toggle:hover { background: rgba(255, 255, 255, 0.08); }
+  .theme-toggle .flipper {
+    position: relative; width: 22px; height: 22px;
+    transform-style: preserve-3d;
+    transition: transform 0.55s cubic-bezier(.7,.0,.3,1);
+  }
+  body.dark .theme-toggle .flipper { transform: rotateY(180deg); }
+  .theme-toggle .face {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  }
+  .theme-toggle .face.back { transform: rotateY(180deg); }
+  .theme-toggle svg {
+    width: 20px; height: 20px;
+    stroke: currentColor; fill: none;
+    stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  /* ─── Page layout (case study) ─────────────────────────────── */
+  main {
+    width: 100%;
+  }
+
+  /* shared accent — green Albert Sans (no italics) */
+  .ital {
+    font-style: normal;
+    font-weight: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    color: var(--brand-deep);
+  }
+  body.dark .ital { color: var(--brand-deep); }
+
+  /* ─── HERO ─────────────────────────────────────────────── */
+  .cs-hero {
+    position: relative;
+    padding: 140px 80px 104px;
+    background: var(--bg);
+    overflow: hidden;
+  }
+  .cs-hero-inner {
+    max-width: 980px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .cs-hero-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 26px;
+  }
+  .cs-brandmark {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex: none;
+    overflow: hidden;
+  }
+  .cs-brandmark img { width: 100%; height: 100%; display: block; object-fit: contain; }
+  .cs-brandmark svg { width: 30px; height: 30px; }
+  .cs-status {
+    display: inline-flex; align-items: center; gap: 9px;
+    padding: 9px 17px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--ink-soft);
+    box-shadow: 0 1px 0 rgba(var(--shadow-color), 0.03), 0 8px 18px -12px rgba(var(--shadow-color), 0.18);
+  }
+  .cs-status .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--brand);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 22%, transparent);
+    animation: statusPulse 2.6s ease-in-out infinite;
+  }
+  @keyframes statusPulse {
+    0%, 100% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 22%, transparent); }
+    50%      { box-shadow: 0 0 0 6px color-mix(in srgb, var(--brand) 8%, transparent); }
+  }
+  .cs-eyebrow {
+    font-size: 13px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--brand-deep);
+    margin: 0 0 28px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .cs-eyebrow .sep { color: var(--ink-faint); opacity: 0.6; }
+  .cs-hero h1 {
+    font-size: clamp(44px, 5vw, 60px);
+    font-weight: 500;
+    line-height: 0.98;
+    letter-spacing: -0.03em;
+    margin: 0 0 22px;
+    color: var(--ink);
+    text-wrap: balance;
+  }
+  .cs-hero h1 .ital {
+    font-size: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
+  }
+  .cs-hero .lede {
+    font-size: 18px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    margin: 0 0 44px;
+    max-width: 920px;
+    letter-spacing: -0.005em;
+  }
+  .cs-meta {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 36px;
+    margin: 8px 0 0;
+  }
+  .cs-meta-card {
+    position: relative;
+    background: transparent;
+    padding: 1px 0 1px 16px;
+    border-radius: 0;
+    border: none;
+    min-width: 0;
+  }
+  .cs-meta-card::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 1px;
+    width: 2px; height: 14px;
+    background: var(--brand);
+    border-radius: 2px;
+  }
+  .cs-meta-card dt {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--brand-deep);
+    font-weight: 700;
+    margin: 0 0 8px;
+  }
+  .cs-meta-card dd {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    line-height: 1.5;
+    letter-spacing: -0.005em;
+  }
+  .cs-meta-card.skills dd { color: var(--ink-soft); font-weight: 400; }
+
+  .cs-hero-visual {
+    position: relative;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow:
+      0 1px 0 rgba(28, 38, 34, 0.04),
+      0 30px 70px -30px rgba(28, 38, 34, 0.30),
+      0 12px 30px -12px rgba(28, 38, 34, 0.18);
+    background: #fff;
+    border: 1px solid var(--line);
+    transform: none;
+    margin-top: 56px;
+  }
+  .cs-hero-visual video,
+  .cs-hero-visual img {
+    width: 100%;
+    display: block;
+    height: auto;
+    background: var(--bg);
+  }
+  .cs-hero-visual video { object-fit: contain; }
+
+  .cs-hero-scroll {
+    position: absolute;
+    bottom: 38px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--ink-soft);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    z-index: 2;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    animation: hintBob 2.4s ease-in-out infinite;
+    font-weight: 600;
+  }
+  .cs-hero-scroll::after {
+    content: ""; width: 1px; height: 36px;
+    background: linear-gradient(to bottom, color-mix(in srgb, var(--ink-soft) 70%, transparent), transparent);
+  }
+  @keyframes hintBob {
+    0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.85; }
+    50%      { transform: translateX(-50%) translateY(6px); opacity: 1; }
+  }
+
+  /* ─── Section template ───────────────────────────── */
+  section.cs {
+    padding: 124px 80px;
+    position: relative;
+    background: var(--bg);
+  }
+  /* Figma frame label removed */
+  section.cs::before { content: none; }
+  section.cs.bg-soft { background: var(--bg); }
+  section.cs.bg-mint { background: var(--bg); }
+  /* extra breathing room before the footer */
+  #learnings { padding-bottom: 124px; }
+
+  /* Subtle organic wave between alternating sections.
+     Sized to feel hand-drawn, not geometric. */
+  section.cs.bg-soft + section.cs:not(.bg-soft),
+  section.cs.bg-mint + section.cs:not(.bg-mint),
+  section.cs:not(.bg-soft):not(.bg-mint) + section.cs.bg-soft,
+  section.cs:not(.bg-soft):not(.bg-mint) + section.cs.bg-mint {
+    /* allow contrast — no extra rule, just kept for legibility */
+  }
+
+  .cs-inner {
+    max-width: 980px;
+    margin: 0 auto;
+  }
+  .cs-num {
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--brand-deep);
+    margin: 0 0 24px;
+    display: inline-block;
+  }
+  .cs-title {
+    font-size: clamp(34px, 4.2vw, 56px);
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: -0.028em;
+    margin: 0 0 32px;
+    text-wrap: balance;
+    max-width: 980px;
+    color: var(--ink);
+  }
+  .cs-title .ital { font-size: inherit; line-height: inherit; }
+  .cs-lede {
+    font-size: 19px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    max-width: none;
+    margin: 0 0 56px;
+    letter-spacing: -0.005em;
+    text-wrap: pretty;
+  }
+  .cs-lede.indent { margin-left: 0; }
+  .cs-body p {
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    margin: 0 0 22px;
+    letter-spacing: -0.005em;
+    text-wrap: pretty;
+  }
+  .cs-body p strong, .cs-body strong,
+  .cs-lede strong, .cs-after-note strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .cs-body { max-width: none; }
+
+  /* ─── Animated illustration: creators × global audiences ───
+     Original, primitive-only composition: a slowly spinning globe,
+     concentric sound-wave rings emanating outward, and language
+     chips floating around the orbit. Honors the brief — "in the
+     style of the animation reference" (gentle, looping, soft motion)
+     without recreating any specific copyrighted visual. */
+  .global-anim {
+    position: relative;
+    border-radius: 22px;
+    overflow: hidden;
+    aspect-ratio: 5 / 4;
+    background:
+      radial-gradient(circle at 22% 18%, rgba(255, 255, 255, 0.75) 0%, transparent 38%),
+      radial-gradient(circle at 80% 82%, color-mix(in srgb, var(--brand) 18%, transparent) 0%, transparent 50%),
+      linear-gradient(160deg, #fff8e2 0%, #f0e9d2 100%);
+    border: 1px solid var(--line);
+    box-shadow:
+      0 1px 0 rgba(var(--shadow-color), 0.04),
+      0 26px 60px -28px rgba(var(--shadow-color), 0.22);
+  }
+  body.dark .global-anim {
+    background:
+      radial-gradient(circle at 22% 18%, rgba(108, 220, 191, 0.10) 0%, transparent 40%),
+      radial-gradient(circle at 80% 82%, rgba(108, 220, 191, 0.06) 0%, transparent 50%),
+      linear-gradient(160deg, #161d1a 0%, #11161A 100%);
+  }
+  .global-anim-stage {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .global-anim .globe {
+    width: 46%;
+    aspect-ratio: 1;
+    height: auto;
+    filter: drop-shadow(0 16px 36px rgba(19, 116, 89, 0.32));
+    animation: globeSpin 22s linear infinite;
+    transform-origin: center;
+  }
+  @keyframes globeSpin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  /* Sound-wave rings */
+  .global-anim .ring {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 30%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 1.5px solid color-mix(in srgb, var(--brand) 75%, transparent);
+    transform: translate(-50%, -50%) scale(0.6);
+    opacity: 0;
+    pointer-events: none;
+    animation: wavePulse 4.4s cubic-bezier(.2,.7,.2,1) infinite;
+  }
+  .global-anim .ring.r1 { animation-delay: 0s; }
+  .global-anim .ring.r2 { animation-delay: 1.5s; }
+  .global-anim .ring.r3 { animation-delay: 3.0s; }
+  @keyframes wavePulse {
+    0%   { transform: translate(-50%, -50%) scale(0.55); opacity: 0.55; }
+    70%  { opacity: 0.18; }
+    100% { transform: translate(-50%, -50%) scale(2.6); opacity: 0; }
+  }
+  /* Language chips orbit */
+  .global-anim .lang-chip {
+    position: absolute;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    padding: 8px 16px;
+    background: var(--surface);
+    color: var(--ink);
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    box-shadow: 0 6px 14px -8px rgba(var(--shadow-color), 0.22), 0 1px 0 rgba(var(--shadow-color), 0.03);
+    white-space: nowrap;
+    z-index: 2;
+    animation: chipFloat 6.5s ease-in-out infinite;
+    will-change: transform;
+  }
+  .global-anim .lang-chip .dot {
+    display: inline-block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--brand);
+    margin-right: 8px;
+    vertical-align: 1px;
+  }
+  .global-anim .lang-chip.l-en { top: 12%;  left: 9%;   animation-delay: -0.2s; }
+  .global-anim .lang-chip.l-es { top: 6%;   left: 50%;  animation-delay: -1.4s; transform: translateX(-50%); }
+  .global-anim .lang-chip.l-ja { top: 18%;  right: 8%;  animation-delay: -2.1s; }
+  .global-anim .lang-chip.l-ja .dot { background: var(--brand-pink); }
+  .global-anim .lang-chip.l-zh { top: 48%;  right: 2%;  animation-delay: -3.0s; }
+  .global-anim .lang-chip.l-ar { bottom: 16%; right: 14%; animation-delay: -3.8s; }
+  .global-anim .lang-chip.l-ar .dot { background: var(--brand-pink); }
+  .global-anim .lang-chip.l-pt { bottom: 6%;  left: 45%; animation-delay: -4.6s; transform: translateX(-50%); }
+  .global-anim .lang-chip.l-fr { bottom: 22%; left: 6%;  animation-delay: -5.4s; }
+  .global-anim .lang-chip.l-de { top: 50%;  left: 2%;   animation-delay: -2.6s; }
+  @keyframes chipFloat {
+    0%, 100% { translate: 0 0; }
+    50%      { translate: 0 -10px; }
+  }
+  /* The "es" + "pt" chips are centered horizontally so they need a
+     centered-float keyframe to keep their translateX(-50%). */
+  .global-anim .lang-chip.l-es,
+  .global-anim .lang-chip.l-pt {
+    animation-name: chipFloatCentered;
+  }
+  @keyframes chipFloatCentered {
+    0%, 100% { transform: translate(-50%, 0); }
+    50%      { transform: translate(-50%, -10px); }
+  }
+  /* Voice mic in the center foreground */
+  .global-anim .mic {
+    position: absolute;
+    width: 13%; aspect-ratio: 1;
+    border-radius: 50%;
+    background: linear-gradient(180deg, var(--brand) 0%, var(--brand-deep) 100%);
+    color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.5) inset,
+      0 12px 28px -10px rgba(19, 116, 89, 0.55);
+    z-index: 3;
+    animation: micBob 4s ease-in-out infinite;
+  }
+  .global-anim .mic svg { width: 56%; height: 56%; }
+  @keyframes micBob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-6px); }
+  }
+  .global-anim .caption {
+    position: absolute;
+    left: 0; right: 0; bottom: 18px;
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 600;
+    z-index: 1;
+    pointer-events: none;
+  }
+  /* Pause animations if a user prefers reduced motion. */
+  @media (prefers-reduced-motion: reduce) {
+    .global-anim .globe,
+    .global-anim .ring,
+    .global-anim .lang-chip,
+    .global-anim .mic { animation: none; }
+  }
+
+  /* Background-section image — full-bleed banner that spans the whole
+     viewport width, ignoring the section's left/right padding. */
+  .cs-bg-figure {
+    margin-top: 72px;
+    margin-bottom: 0;
+    width: 100vw;
+    margin-left: 50%;
+    transform: translateX(-50%);
+    max-width: none;
+  }
+  .cs-bg-figure img {
+    width: 100%;
+    margin-left: 0;
+    max-width: none;
+    height: auto;
+    display: block;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    background: transparent;
+  }
+  .cs-anim-wrap {
+    margin: 56px auto 0;
+    max-width: 620px;
+  }
+  .cs-anim-wrap .global-anim {
+    margin: 0;
+    aspect-ratio: 16 / 10;
+    border-radius: 20px;
+  }
+
+  /* Hero figure — large bleed image */
+  .cs-figure {
+    margin: 0;
+    border-radius: 20px;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    box-shadow:
+      0 1px 0 rgba(var(--shadow-color), 0.04),
+      0 26px 60px -28px rgba(var(--shadow-color), 0.22);
+  }
+  .cs-figure img,
+  .cs-figure video {
+    width: 100%;
+    display: block;
+    height: auto;
+  }
+  .cs-figcaption {
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    margin-top: 16px;
+    text-align: center;
+    letter-spacing: 0.04em;
+    font-family: ui-monospace, 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+  }
+
+  /* Two column blocks */
+  .cs-two {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
+  }
+  .cs-two.flip > *:first-child { order: 2; }
+  .cs-two.flip > *:last-child { order: 1; }
+
+  /* Quote (the "We don't like the current website" beat) */
+  .cs-quote {
+    background: var(--ink);
+    color: var(--bg);
+    border-radius: 24px;
+    padding: 64px 80px;
+    margin: 0 auto;
+    max-width: 1000px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .cs-quote::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(0, 169, 134, 0.18) 0%, transparent 55%),
+      radial-gradient(circle at 85% 80%, rgba(252, 127, 163, 0.10) 0%, transparent 55%);
+    pointer-events: none;
+  }
+  .cs-quote-text {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(28px, 3.4vw, 44px);
+    line-height: 1.2;
+    margin: 0 0 22px;
+    color: #f8efd8;
+    letter-spacing: -0.01em;
+    position: relative;
+    text-wrap: balance;
+  }
+  .cs-quote-attr {
+    font-size: 13px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--brand-deep);
+    color: #6cdcbf;
+    position: relative;
+  }
+
+  /* Side cards (questions / wanted-vs-didnt etc.) */
+  .cs-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .cs-card {
+    background: var(--surface);
+    padding: 22px 26px;
+    border-radius: 16px;
+    border: 1px solid var(--line);
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    box-shadow: 0 1px 0 rgba(var(--shadow-color), 0.02), 0 8px 20px -16px rgba(var(--shadow-color), 0.12);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .cs-card:hover { transform: translateY(-2px); box-shadow: 0 1px 0 rgba(var(--shadow-color), 0.04), 0 14px 28px -16px rgba(var(--shadow-color), 0.18); }
+  .cs-card .num {
+    flex: none;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--brand-mint);
+    color: var(--brand-deep);
+    font-size: 12px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+  }
+  .cs-card p { margin: 0; font-size: 16px; line-height: 1.5; color: var(--ink); letter-spacing: -0.005em; }
+
+  /* Wanted / Didn't like split */
+  .cs-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  .cs-pane {
+    padding: 36px 40px 38px;
+    border-radius: 20px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+  }
+  .cs-pane.wanted {
+    background: var(--bg-mint);
+    border: none;
+  }
+  .cs-pane.disliked {
+    background: #fdeee8;
+    border: none;
+  }
+  body.dark .cs-pane.wanted { background: #16302a; border: none; }
+  body.dark .cs-pane.disliked { background: #2c1f1a; border: none; }
+  .cs-pane h4 {
+    font-size: 12px;
+    letter-spacing: 0.20em;
+    text-transform: uppercase;
+    margin: 0 0 18px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .cs-pane.wanted h4 { color: var(--brand-deep); }
+  .cs-pane.disliked h4 { color: #b3553a; }
+  body.dark .cs-pane.disliked h4 { color: #e9a384; }
+  .cs-pane ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 20px; }
+  .cs-pane li {
+    font-size: 17px;
+    line-height: 1.5;
+    color: var(--ink);
+    position: relative;
+    padding-left: 38px;
+    letter-spacing: -0.005em;
+  }
+  .cs-pane li::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--brand-mint);
+    background-image: var(--bullet-icon, none);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 12px 12px;
+  }
+  .cs-pane.wanted li::before {
+    background-color: var(--brand);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3 8.5l3.5 3.5L13 5.5'/></svg>");
+  }
+  .cs-pane.disliked li::before {
+    background-color: #d97757;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23ffffff' stroke-width='2.6' stroke-linecap='round'><path d='M5 5l6 6M11 5l-6 6'/></svg>");
+  }
+
+  /* Guiding question — the HMW that bridges Problem → the rest.
+     Full-bleed light-grey band so it contrasts with the mint panel above. */
+  .cs-guiding {
+    margin: 0;
+    width: 100%;
+    padding: 92px 56px;
+    border-radius: 0;
+    background: #f7f7f5;
+    border-top: none;
+    border-bottom: none;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  body.dark .cs-guiding { background: #141815; border-color: transparent; }
+  .cs-guiding .gq-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--brand-deep);
+    margin-bottom: 26px;
+    white-space: nowrap;
+  }
+  .cs-guiding .gq-eyebrow::before,
+  .cs-guiding .gq-eyebrow::after {
+    content: "";
+    width: 26px; height: 1px;
+    background: color-mix(in srgb, var(--brand) 45%, transparent);
+  }
+  .cs-guiding .gq-text {
+    font-size: clamp(27px, 3vw, 39px);
+    font-weight: 500;
+    line-height: 1.26;
+    letter-spacing: -0.022em;
+    color: var(--ink);
+    margin: 0 auto;
+    max-width: 900px;
+    text-wrap: balance;
+    transition: transform 0.4s cubic-bezier(.3,1.1,.4,1);
+    transform-origin: center;
+  }
+  .cs-guiding:hover .gq-text { transform: scale(1.035); }
+  .cs-guiding .gq-text .ital { font-size: inherit; line-height: inherit; }
+
+  /* ─── 03 · Research — competitive-analysis logo wall ─────────
+     Monochrome wordmarks sit in a light-grey box, the way audited
+     competitors are usually shown in a case study. Marks are simple
+     primitives only (circle / square / triangle / slash). */
+  .cs-logowall {
+    background: #f1f1ef;
+    border: none;
+    border-radius: 22px;
+    padding: 18px 44px;
+    margin: 8px 0 48px;
+  }
+  body.dark .cs-logowall { background: #ededeb; }
+  .cs-logowall-label {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 11.5px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--ink-faint);
+    margin: 0 2px 26px;
+  }
+  .cs-logowall-label::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+  .cs-logos {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 30px 72px;
+    padding: 30px 24px;
+  }
+  .cs-logo { display: block; width: auto; flex: none; }
+  /* Real brand logos — sized so optical weight is balanced across the row */
+  .lg-eleven { height: 30px; }
+  .lg-heygen { height: 52px; }
+  .lg-synth  { height: 30px; }
+  @media (max-width: 720px) {
+    .cs-logos { gap: 26px 44px; padding: 22px 8px; }
+    .lg-eleven { height: 24px; }
+    .lg-heygen { height: 42px; }
+    .lg-synth  { height: 24px; }
+  }
+
+  /* Warm tan panel that groups cards (insights, priorities) — matches Figma */
+  .cs-panel {
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+    margin-top: 0;
+  }
+  body.dark .cs-panel { background: rgba(255,255,255,0.035); }
+
+  /* Insight cards (3-up) */
+  .cs-insights {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+  }
+  .cs-insight {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 32px 30px 34px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    position: relative;
+    transition: transform 0.3s cubic-bezier(.2,.7,.2,1), box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+  .cs-insight:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 18px 40px -22px rgba(var(--shadow-color), 0.20);
+    border-color: color-mix(in srgb, var(--brand) 30%, var(--line));
+  }
+  .cs-insight:hover .qt { color: var(--ink); }
+  .cs-insight .qt { transition: color 0.3s ease; }
+  .cs-insight .ix {
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--brand-deep);
+    font-weight: 700;
+  }
+  .cs-insight h4 {
+    font-size: 21px;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+  .cs-insight .qt {
+    font-style: normal;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    margin: 0;
+    padding-left: 14px;
+    border-left: 2px solid var(--brand);
+  }
+
+  /* Empathize — interview question grid */
+  .cs-qgrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 72px;
+  }
+  .cs-qcard {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 24px 26px;
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    box-shadow: 0 1px 0 rgba(var(--shadow-color), 0.02), 0 8px 20px -16px rgba(var(--shadow-color), 0.12);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  }
+  .cs-qcard:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--brand) 30%, var(--line));
+    box-shadow: 0 1px 0 rgba(var(--shadow-color), 0.04), 0 16px 30px -18px rgba(var(--shadow-color), 0.2);
+  }
+  .cs-qcard .qi {
+    flex: none;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--brand-mint);
+    color: var(--brand-deep);
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: transform 0.3s cubic-bezier(.2,1.6,.4,1);
+  }
+  .cs-qcard:hover .qi { transform: rotate(-8deg) scale(1.08); }
+  .cs-qcard .qi svg { width: 20px; height: 20px; }
+  .cs-qcard p {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.45;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+  }
+  .cs-subhead {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.012em;
+    color: var(--ink);
+    margin: 0 0 32px;
+  }
+  .cs-after-note {
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    margin: 56px 0 0;
+    max-width: none;
+    letter-spacing: -0.005em;
+    text-wrap: pretty;
+  }
+
+  /* HMW (3-up reframings) */
+  .cs-hmw {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .cs-hmw-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 36px 32px 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    transition: transform 0.3s cubic-bezier(.2,.7,.2,1), box-shadow 0.3s ease;
+  }
+  .cs-hmw-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 18px 40px -22px rgba(var(--shadow-color), 0.18);
+  }
+  .cs-hmw-card .hmw {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--brand-deep);
+    letter-spacing: -0.01em;
+  }
+  .cs-hmw-card .hmw-q {
+    font-size: 20px;
+    line-height: 1.35;
+    font-weight: 500;
+    color: var(--ink);
+    letter-spacing: -0.012em;
+    margin: 0;
+  }
+
+  /* Scoping priorities */
+  .cs-priorities {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 24px;
+  }
+  .cs-priority {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 32px 28px 36px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: transform 0.3s cubic-bezier(.2,.7,.2,1), box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+  .cs-priority:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 18px 40px -22px rgba(var(--shadow-color), 0.20);
+    border-color: color-mix(in srgb, var(--brand) 30%, var(--line));
+  }
+  .cs-priority:hover .pn { transform: rotate(-6deg) scale(1.06); }
+  .cs-priority .pn {
+    transition: transform 0.4s cubic-bezier(.2,1.6,.4,1);
+  }
+  .cs-priority.lower {
+    background: transparent;
+    border-style: dashed;
+    border-color: color-mix(in srgb, var(--ink-faint) 50%, transparent);
+  }
+  .cs-priority .pn {
+    width: 38px; height: 38px;
+    border-radius: 999px;
+    background: var(--brand);
+    color: #fff;
+    font-weight: 700;
+    font-size: 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+  .cs-priority.lower .pn { background: transparent; color: var(--ink-faint); border: 1px dashed var(--ink-faint); }
+  .cs-priority h4 {
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0;
+    letter-spacing: -0.012em;
+    line-height: 1.2;
+  }
+  .cs-priority.note-cell:hover { transform: none; box-shadow: none; border-color: transparent; }
+  .cs-priority p {
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+  .cs-priorities-row-label {
+    grid-column: 1 / -1;
+    margin-top: 32px;
+    font-size: 11.5px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--ink-faint);
+    display: flex; align-items: center; gap: 14px;
+  }
+  .cs-priorities-row-label::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+
+  /* Tradeoffs (3 cards, full row) */
+  .cs-tradeoffs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .cs-tradeoff {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s cubic-bezier(.2,.7,.2,1), box-shadow 0.3s ease;
+  }
+  .cs-tradeoff:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 22px 44px -24px rgba(var(--shadow-color), 0.22);
+  }
+  .cs-tradeoff .topic {
+    padding: 18px 28px;
+    background: var(--bg-mint);
+    border-bottom: 1px solid var(--line);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--brand-deep);
+  }
+  body.dark .cs-tradeoff .topic { background: #16302a; }
+  .cs-tradeoff .preview {
+    background: #ffffff;
+    border-bottom: 1px solid var(--line);
+    height: 168px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  body.dark .cs-tradeoff .preview {
+    background: #fafafa;
+  }
+  .cs-tradeoff .preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    transition: transform 0.5s cubic-bezier(.2,.7,.2,1);
+  }
+  .cs-tradeoff:hover .preview img { transform: scale(1.04); }
+  .cs-tradeoff h4 {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+    margin: 0;
+    padding: 28px 28px 0;
+  }
+  .cs-tradeoff dl {
+    margin: 18px 28px 28px;
+    display: grid;
+    grid-template-columns: 88px 1fr;
+    gap: 10px 18px;
+  }
+  .cs-tradeoff dt {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--brand-deep);
+    padding-top: 2px;
+  }
+  .cs-tradeoff dd {
+    margin: 0;
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--ink);
+    letter-spacing: -0.003em;
+  }
+
+  /* Decisions & Tradeoffs — full-width alternating rows */
+  .cs-trows { display: flex; flex-direction: column; gap: 28px; }
+  .cs-trow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 56px;
+    align-items: center;
+    background: var(--bg-mint);
+    border: none;
+    border-radius: 24px;
+    padding: 48px;
+    transition: transform 0.35s cubic-bezier(.2,.7,.2,1), box-shadow 0.35s ease;
+  }
+  .cs-trow:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 26px 56px -30px rgba(var(--shadow-color), 0.28);
+  }
+  .cs-trow.flip .cs-trow-media { order: 2; }
+  .cs-trow.flip .cs-trow-body { order: 1; }
+  .cs-trow-media { position: relative; }
+  .cs-trow-media > img {
+    width: 100%; display: block;
+    border-radius: 14px;
+    background: #fff;
+    border: 1px solid var(--line);
+    box-shadow: 0 1px 0 rgba(var(--shadow-color), 0.04), 0 22px 48px -26px rgba(var(--shadow-color), 0.30);
+    transition: transform 0.45s cubic-bezier(.2,.7,.2,1);
+  }
+  .cs-trow:hover .cs-trow-media > img { transform: scale(1.015); }
+  .cs-trow-media.stack { position: relative; padding: 0 0 40px 0; }
+  .cs-trow-media.stack .m1 { position: relative; z-index: 1; width: 90%; }
+  .cs-trow-media.stack .m2 {
+    position: absolute; right: 0; bottom: 0; width: 90%; z-index: 3;
+  }
+  /* Tradeoff 3 — graphic masked inside the green box (no overflow) */
+  .cs-trow-media.framed {
+    border-radius: 14px;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+    border: 1px solid var(--line);
+    background: #fff;
+    box-shadow: 0 1px 0 rgba(var(--shadow-color), 0.04), 0 22px 48px -26px rgba(var(--shadow-color), 0.30);
+  }
+  .cs-trow-media.framed > img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: top center;
+    border-radius: 0; border: none; box-shadow: none;
+  }
+  .cs-trow-media > img.tilt { transform: none; }
+  .cs-trow-body h4 {
+    font-size: 23px; font-weight: 600;
+    color: var(--ink); letter-spacing: -0.015em;
+    margin: 0 0 22px; line-height: 1.2;
+  }
+  .cs-trow-body dl {
+    margin: 0;
+    display: grid;
+    grid-template-columns: 104px 1fr;
+    gap: 16px 22px;
+  }
+  .cs-trow-body dt {
+    font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase;
+    font-weight: 700; color: var(--brand-deep); padding-top: 3px;
+  }
+  .cs-trow-body dd {
+    margin: 0; font-size: 15.5px; line-height: 1.55;
+    color: var(--ink); letter-spacing: -0.003em;
+  }
+
+  /* Final designs feature highlights */
+  .cs-features {
+    display: flex;
+    flex-direction: column;
+    gap: 120px;
+  }
+  .cs-feature {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+  .cs-feature.flip .cs-feature-text { order: 2; }
+  .cs-feature.flip .cs-feature-visual { order: 1; }
+  .cs-feature .tag {
+    font-size: 11.5px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--brand-deep);
+    font-weight: 700;
+    margin: 0 0 14px;
+  }
+  .cs-feature h3 {
+    font-size: clamp(28px, 3vw, 40px);
+    font-weight: 500;
+    color: var(--ink);
+    margin: 0 0 18px;
+    letter-spacing: -0.022em;
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+  .cs-feature p {
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    margin: 0;
+    letter-spacing: -0.005em;
+    text-wrap: pretty;
+  }
+  .cs-feature-visual {
+    border-radius: 18px;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    box-shadow:
+      0 1px 0 rgba(var(--shadow-color), 0.03),
+      0 24px 50px -28px rgba(var(--shadow-color), 0.25);
+    position: relative;
+    aspect-ratio: 16 / 11;
+  }
+  .cs-feature-visual img,
+  .cs-feature-visual video {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    display: block;
+    transition: transform 0.6s cubic-bezier(.2,.7,.2,1);
+  }
+  .cs-feature:hover .cs-feature-visual img,
+  .cs-feature:hover .cs-feature-visual video { transform: scale(1.02); }
+  .cs-feature-visual {
+    transition: transform 0.4s cubic-bezier(.2,.7,.2,1), box-shadow 0.4s ease;
+  }
+  .cs-feature:hover .cs-feature-visual {
+    transform: translateY(-4px);
+    box-shadow:
+      0 1px 0 rgba(var(--shadow-color), 0.04),
+      0 32px 64px -28px rgba(var(--shadow-color), 0.32);
+  }
+  .cs-feature-visual.placeholder {
+    background:
+      repeating-linear-gradient(45deg, color-mix(in srgb, var(--ink) 5%, transparent) 0 10px, transparent 10px 20px),
+      var(--bg-soft);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+    color: var(--ink-faint);
+    font-family: ui-monospace, 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    gap: 8px;
+  }
+  .cs-feature-visual.placeholder svg {
+    width: 36px; height: 36px;
+    color: var(--ink-faint);
+    margin-bottom: 8px;
+  }
+
+  /* Before / After improvement */
+  .cs-imp {
+    margin-bottom: 100px;
+  }
+  .cs-imp:last-child { margin-bottom: 0; }
+  .cs-imp-head {
+    display: flex;
+    align-items: baseline;
+    gap: 24px;
+    margin-bottom: 36px;
+  }
+  .cs-imp-head .imp-num {
+    font-size: 14px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--brand-deep);
+    flex: none;
+  }
+  .cs-imp-head h3 {
+    font-size: clamp(26px, 2.6vw, 36px);
+    font-weight: 500;
+    color: var(--ink);
+    margin: 0 0 6px;
+    letter-spacing: -0.022em;
+    line-height: 1.15;
+  }
+  .cs-imp-head p {
+    font-size: 16.5px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    margin: 0;
+    max-width: none;
+    letter-spacing: -0.005em;
+  }
+  .cs-ba {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .cs-ba .frame {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .cs-ba .label {
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .cs-ba .label::before {
+    content: "";
+    width: 9px; height: 9px;
+    border-radius: 50%;
+  }
+  .cs-ba .before .label { color: #b3553a; }
+  .cs-ba .before .label::before { background: #d97757; }
+  .cs-ba .after .label { color: var(--brand-deep); }
+  .cs-ba .after .label::before { background: var(--brand); }
+  .cs-ba img {
+    width: 100%;
+    border-radius: 14px;
+    display: block;
+    box-shadow: 0 1px 0 rgba(var(--shadow-color), 0.04), 0 18px 40px -22px rgba(var(--shadow-color), 0.2);
+    border: 1px solid var(--line);
+    background: var(--surface);
+    transition: transform 0.45s cubic-bezier(.2,.7,.2,1);
+  }
+  .cs-ba .frame { transition: transform 0.35s ease; }
+  .cs-ba .frame:hover img { transform: scale(1.015); }
+  .cs-ba .frame.tall img,
+  .cs-ba .frame.crop img {
+    aspect-ratio: auto;
+    object-fit: contain;
+    height: auto;
+  }
+  .cs-ba .frame video {
+    width: 100%;
+    border-radius: 14px;
+    display: block;
+    box-shadow: 0 1px 0 rgba(var(--shadow-color), 0.04), 0 18px 40px -22px rgba(var(--shadow-color), 0.2);
+    border: 1px solid var(--line);
+    height: auto;
+  }
+  /* Equal-height before/after media (key improvement 04): both sit in the
+     same 16:9 box (the video's native ratio) so heights match exactly. The
+     video uses contain so the full frame stays visible — no cropped edges —
+     while the before screenshot fills the box. */
+  .cs-ba.equal-media .frame.crop img,
+  .cs-ba.equal-media .frame video {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    height: auto;
+  }
+  .cs-ba.equal-media .frame.crop img {
+    object-fit: cover;
+    object-position: top center;
+  }
+  .cs-ba.equal-media .frame video {
+    object-fit: cover;
+    object-position: top center;
+    transition: transform 0.45s cubic-bezier(.2,.7,.2,1);
+  }
+  .cs-ba.equal-media .frame:hover video { transform: scale(1.015); }
+  /* "Dark UI" frame — used for old Voxbee site screenshots so the dark
+     screenshot sits inside a matching dark surface (no harsh cream/white
+     fringe around the navy artwork). */
+  .cs-ba .frame.dark-ui img {
+    background: #0a0a2c;
+    border: 1px solid #1c1c3c;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.04) inset,
+      0 22px 50px -22px rgba(0, 0, 0, 0.45);
+  }
+  /* Fanned deck of "after" pages (key improvement 03) */
+  .cs-ba .frame .fan {
+    position: relative;
+    height: 262px;
+    margin-top: -4px;
+  }
+  .cs-ba .frame .fan img {
+    position: absolute;
+    bottom: 4px;
+    width: 48%;
+    aspect-ratio: auto;
+    height: auto;
+    margin: 0;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: #fff;
+    box-shadow: 0 14px 34px -16px rgba(var(--shadow-color), 0.34);
+    transform-origin: 50% 100%;
+    transition: transform 0.4s cubic-bezier(.2,.7,.2,1);
+  }
+  .cs-ba .frame .fan img:nth-child(1) { left: 24%; transform: translateX(-50%) rotate(-16deg); z-index: 1; }
+  .cs-ba .frame .fan img:nth-child(2) { left: 41%; transform: translateX(-50%) rotate(-5deg);  z-index: 2; }
+  .cs-ba .frame .fan img:nth-child(3) { left: 59%; transform: translateX(-50%) rotate(5deg);   z-index: 3; }
+  .cs-ba .frame .fan img:nth-child(4) { left: 76%; transform: translateX(-50%) rotate(16deg);  z-index: 4; }
+  .cs-ba .frame .fan:hover img:nth-child(1) { transform: translateX(-50%) rotate(-22deg); }
+  .cs-ba .frame .fan:hover img:nth-child(2) { transform: translateX(-50%) rotate(-8deg); }
+  .cs-ba .frame .fan:hover img:nth-child(3) { transform: translateX(-50%) rotate(8deg); }
+  .cs-ba .frame .fan:hover img:nth-child(4) { transform: translateX(-50%) rotate(22deg); }
+
+  /* 2x2 grid of "after" pages inside a single after-frame */
+  .cs-ba .frame .pages-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 10px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: 0 1px 0 rgba(var(--shadow-color), 0.04), 0 18px 40px -22px rgba(var(--shadow-color), 0.2);
+  }
+  .cs-ba .frame .pages-grid img {
+    aspect-ratio: 16 / 11;
+    object-fit: cover;
+    object-position: top center;
+    margin: 0;
+    box-shadow: none;
+    border-radius: 8px;
+    border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+    transition: transform 0.4s cubic-bezier(.2,.7,.2,1);
+  }
+  .cs-ba .frame .pages-grid img:hover { transform: scale(1.02); z-index: 1; }
+
+  /* Before/after captions + messaging quote cards */
+  .cs-ba .frame .cap {
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    margin: 4px 0 0;
+    letter-spacing: -0.005em;
+    text-wrap: pretty;
+  }
+  .cs-ba .quote-card {
+    border-radius: 14px;
+    padding: 40px 36px;
+    min-height: 210px;
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--line);
+    box-shadow: 0 1px 0 rgba(var(--shadow-color), 0.04), 0 18px 40px -22px rgba(var(--shadow-color), 0.2);
+    transition: transform 0.35s cubic-bezier(.2,.7,.2,1);
+  }
+  .cs-ba .frame:hover .quote-card { transform: translateY(-3px); }
+  .cs-ba .quote-card p {
+    font-style: normal;
+    font-size: 20px;
+    line-height: 1.45;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  .cs-ba .quote-card.mission { background: var(--surface); }
+  .cs-ba .quote-card.mission p { color: var(--ink-soft); }
+  .cs-ba .quote-card.creator {
+    background: var(--bg-mint);
+    border-color: color-mix(in srgb, var(--brand) 25%, transparent);
+  }
+  .cs-ba .quote-card.creator p { color: var(--ink); }
+
+  /* The Solution — plain rows on white, large media */
+  .cs-sol { display: flex; flex-direction: column; gap: 88px; }
+  .cs-solcard {
+    display: grid;
+    grid-template-columns: 0.85fr 1.15fr;
+    gap: 56px;
+    align-items: center;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+  }
+  body.dark .cs-solcard { background: transparent; }
+  .cs-solcard:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  .cs-solcard .tag {
+    font-size: 11.5px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--brand-deep); font-weight: 700; margin: 0 0 14px;
+  }
+  .cs-solcard h3 {
+    font-size: clamp(24px, 2.5vw, 32px);
+    font-weight: 500; color: var(--ink);
+    margin: 0 0 16px; letter-spacing: -0.02em; line-height: 1.12;
+    text-wrap: balance;
+  }
+  .cs-solcard p.body {
+    font-size: 16.5px; line-height: 1.6; color: var(--ink-soft);
+    margin: 0; letter-spacing: -0.005em; text-wrap: pretty;
+  }
+  .cs-solcard .media {
+    border-radius: 16px;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid var(--line);
+    box-shadow: 0 1px 0 rgba(var(--shadow-color), 0.04), 0 22px 48px -28px rgba(var(--shadow-color), 0.28);
+    position: relative;
+  }
+  .cs-solcard .media video,
+  .cs-solcard .media img {
+    width: 100%; height: auto;
+    object-fit: contain;
+    display: block;
+  }
+
+  /* Impact — staggered stat cards */
+  .cs-impact2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    max-width: 920px;
+  }
+  .cs-istat {
+    background: var(--bg-mint);
+    border: none;
+    border-radius: 22px;
+    padding: 38px 34px 34px;
+    transition: transform 0.35s cubic-bezier(.2,.7,.2,1), box-shadow 0.35s ease;
+  }
+  .cs-istat:nth-child(even) { transform: translateY(34px); }
+  .cs-istat:nth-child(even):hover { transform: translateY(30px); }
+  .cs-istat:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 26px 52px -30px rgba(var(--shadow-color), 0.26);
+  }
+  .cs-istat .n {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: clamp(46px, 5.4vw, 68px);
+    font-weight: 400;
+    color: var(--brand-deep);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+  }
+  .cs-istat .label {
+    font-size: 15px; line-height: 1.5;
+    color: var(--ink); letter-spacing: -0.005em;
+    max-width: 280px;
+  }
+
+  /* Impact — mint rectangles with icons */
+  .cs-impact-rects {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 8px;
+  }
+  .ic-rect {
+    display: flex; align-items: center; gap: 22px;
+    background: var(--bg-mint);
+    min-height: 132px;
+    padding: 44px 32px;
+    border: none;
+    border-radius: 18px;
+    transition: transform 0.35s cubic-bezier(.2,.7,.2,1);
+  }
+  body.dark .ic-rect { background: #16302a; }
+  .ic-rect:hover { transform: translateY(-4px); }
+  .ic-rect .ic-ico {
+    flex: none; width: 58px; height: 58px;
+    border-radius: 14px;
+    background: #d3efe3;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  body.dark .ic-rect .ic-ico { background: #1a4239; }
+  .ic-rect svg {
+    width: 30px; height: 30px;
+    color: var(--brand-deep);
+    stroke: currentColor; fill: none;
+    stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .ic-rect p {
+    margin: 0;
+    font-size: 18px; font-weight: 600;
+    color: var(--ink); line-height: 1.3;
+    letter-spacing: -0.01em;
+  }
+
+  /* Learnings — 4 cards */
+  .cs-learn {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .cs-learncard {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 34px 32px 36px;
+    transition: transform 0.3s cubic-bezier(.2,.7,.2,1), box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+  .cs-learncard:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 20px 44px -24px rgba(var(--shadow-color), 0.2);
+    border-color: color-mix(in srgb, var(--brand) 30%, var(--line));
+  }
+  .cs-learncard h4 {
+    font-size: 20px; font-weight: 600; color: var(--ink);
+    margin: 0 0 12px; letter-spacing: -0.014em; line-height: 1.2;
+  }
+  .cs-learncard p {
+    font-size: 15.5px; line-height: 1.6; color: var(--ink-soft);
+    margin: 0; letter-spacing: -0.005em; text-wrap: pretty;
+  }
+
+  /* Impact stats */
+  .cs-impact {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .cs-stat {
+    padding: 56px 32px;
+    text-align: center;
+    border-right: 1px solid var(--line);
+    transition: background 0.35s ease;
+    position: relative;
+  }
+  .cs-stat:last-child { border-right: none; }
+  .cs-stat:hover { background: color-mix(in srgb, var(--brand-mint) 60%, transparent); }
+  .cs-stat:hover .n { transform: scale(1.05); }
+  .cs-stat .n { transition: transform 0.4s cubic-bezier(.2,1.6,.4,1); }
+  .cs-stat .n {
+    font-size: clamp(40px, 5vw, 64px);
+    font-weight: 500;
+    color: var(--brand-deep);
+    line-height: 1;
+    letter-spacing: -0.025em;
+    margin-bottom: 14px;
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+  }
+  .cs-stat .n .unit {
+    font-family: 'Albert Sans', sans-serif;
+    font-style: normal;
+    font-size: 0.5em;
+    font-weight: 500;
+    color: var(--ink);
+    margin-left: 4px;
+    letter-spacing: -0.01em;
+  }
+  .cs-stat .label {
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    letter-spacing: -0.005em;
+  }
+
+  /* Reflections */
+  .cs-reflect {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 72px;
+  }
+  .cs-reflect h3 {
+    font-size: 24px;
+    font-weight: 500;
+    letter-spacing: -0.018em;
+    margin: 0 0 28px;
+    color: var(--ink);
+  }
+  .cs-reflect h3 .ital { font-size: 1.02em; }
+  .cs-reflect ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+  .cs-reflect li {
+    padding-left: 36px;
+    position: relative;
+  }
+  .cs-reflect li::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 8px;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--brand-mint);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23137459' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3 8.5l3.5 3.5L13 5.5'/></svg>");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 12px 12px;
+  }
+  body.dark .cs-reflect li::before {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%236cdcbf' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3 8.5l3.5 3.5L13 5.5'/></svg>");
+  }
+  .cs-reflect li h5 {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0 0 6px;
+    letter-spacing: -0.012em;
+  }
+  .cs-reflect li p {
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    margin: 0;
+    letter-spacing: -0.005em;
+  }
+
+  /* Outro / next case study */
+  .cs-outro {
+    padding: 110px 140px 130px;
+    background: var(--bg-soft);
+    text-align: center;
+  }
+  .cs-outro h2 {
+    font-size: clamp(36px, 4.2vw, 56px);
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: -0.028em;
+    margin: 0 0 20px;
+    color: var(--ink);
+    text-wrap: balance;
+  }
+  .cs-outro p {
+    font-size: 18px;
+    color: var(--ink-soft);
+    margin: 0 0 40px;
+    max-width: 580px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.55;
+  }
+  .cs-outro .btn-row {
+    display: inline-flex;
+    gap: 14px;
+    align-items: center;
+  }
+  .cs-outro a.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 26px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    transition: transform 0.25s ease, background 0.25s ease, color 0.25s ease;
+  }
+  .cs-outro a.btn.primary {
+    background: var(--ink);
+    color: var(--bg);
+  }
+  .cs-outro a.btn.primary:hover { transform: translateY(-2px); background: var(--brand-deep); color: #fff; }
+  .cs-outro a.btn.ghost {
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid var(--line);
+  }
+  .cs-outro a.btn.ghost:hover { background: var(--surface); transform: translateY(-2px); }
+  .cs-outro a.btn .arrow { transition: transform 0.25s ease; }
+  .cs-outro a.btn:hover .arrow { transform: translateX(4px); }
+
+  /* Asset note banner (visible to the user — explains what could be added) */
+  .cs-note {
+    margin: 0 auto 0;
+    max-width: 1280px;
+    padding: 16px 24px;
+    border-radius: 14px;
+    background: rgba(252, 127, 163, 0.10);
+    border: 1px dashed color-mix(in srgb, var(--brand-pink) 55%, transparent);
+    color: var(--ink);
+    font-size: 13.5px;
+    line-height: 1.5;
+    letter-spacing: -0.003em;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .cs-note .pin {
+    flex: none;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--brand-pink);
+    color: #fff;
+    font-weight: 700;
+    font-size: 12px;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+
+  /* ─── Footer (shared) ───────────────────────────── */
+  footer {
+    padding: 48px 96px 32px;
+    border-top: 1px solid var(--line);
+    color: var(--ink-soft);
+    background: var(--bg);
+  }
+  .footer-grid {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 40px;
+    align-items: start;
+  }
+  .footer-brand { display: flex; flex-direction: column; gap: 16px; }
+  .footer-brand .name-row {
+    display: flex; align-items: center; gap: 14px;
+    text-decoration: none; color: inherit; width: fit-content;
+  }
+  .footer-brand .name-row img { width: 42px; height: 42px; object-fit: contain; }
+  .footer-brand .name-row .name {
+    font-size: 24px; font-weight: 500;
+    color: var(--ink); letter-spacing: -0.02em;
+  }
+  .footer-brand .meta {
+    font-size: 15px; color: var(--ink-soft);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .footer-brand .meta .sun-glyph { cursor: default; transition: color 0.25s ease; }
+  .footer-brand .meta .sun-glyph:hover { color: #e8b21f; }
+  body.dark .footer-brand .meta .sun-glyph:hover { color: #c4dd86; }
+  .footer-brand .meta .dot { color: var(--ink-faint); }
+
+  .footer-nav { display: flex; flex-direction: column; gap: 8px; }
+  .footer-nav a {
+    color: var(--ink-soft); text-decoration: none;
+    font-size: 16px; width: fit-content;
+    transition: color 0.2s ease;
+  }
+  .footer-nav a:hover { color: var(--ink); }
+
+  .footer-contact {
+    display: flex; flex-direction: column; gap: 14px;
+    align-items: flex-end; text-align: right;
+  }
+  .footer-contact .greeting {
+    font-size: 15px; color: var(--ink-soft);
+    letter-spacing: -0.005em; line-height: 1.4; max-width: 320px;
+  }
+  .footer-contact .socials { display: flex; gap: 6px; margin-top: 6px; }
+  .footer-contact .socials a {
+    width: 36px; height: 36px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--ink-faint);
+    transition: color 0.2s ease;
+  }
+  body.dark .footer-contact .socials a { color: #8a8983; }
+  .footer-contact .socials a:hover { color: var(--ink-soft); }
+  body.dark .footer-contact .socials a:hover { color: #c2c1b8; }
+  .footer-contact .socials svg { width: 26px; height: 26px; display: block; }
+
+  .footer-bottom {
+    max-width: 1280px;
+    margin: 60px auto 0;
+    text-align: center;
+    display: flex; flex-direction: column; gap: 10px;
+    color: var(--ink-soft);
+  }
+  .footer-bottom .designed { font-size: 15px; }
+  .footer-bottom .designed .heart { color: #d97777; }
+  .footer-bottom .updated {
+    font-size: 13px; color: var(--ink-faint);
+    letter-spacing: 0.06em; text-transform: uppercase;
+    font-weight: 500;
+    display: inline-flex; justify-content: center;
+    cursor: default;
+    transition: color 0.3s ease;
+  }
+  .footer-bottom .updated:hover { color: var(--ink-soft); }
+  .roll { display: inline-block; height: 1em; overflow: hidden; vertical-align: bottom; position: relative; }
+  .roll .reel { display: flex; flex-direction: column; transition: transform 0.7s cubic-bezier(.2,.8,.2,1); transform: translateY(0); }
+  .roll .reel span { display: block; height: 1em; line-height: 1em; }
+
+  /* ─── "Other projects" closing section ─────────────────── */
+  #more-work { padding-top: 96px; padding-bottom: 200px; }
+  #more-work .cs-title { margin-bottom: 44px; }
+  #more-work .more-lede {
+    font-size: 19px; line-height: 1.6; color: var(--ink-soft);
+    margin: 0 0 56px; letter-spacing: -0.005em;
+  }
+  .nx-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 40px;
+  }
+  .nx-card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+  }
+  .nx-thumb {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 22px;
+    overflow: hidden;
+    margin-bottom: 24px;
+    background: #efece4;
+    box-shadow:
+      0 0 0 1px rgba(var(--shadow-color), 0.04),
+      0 18px 40px -20px rgba(var(--shadow-color), 0.18);
+    transition: transform 0.4s cubic-bezier(.2,.7,.2,1), box-shadow 0.4s ease;
+    transform-origin: center;
+  }
+  body.dark .nx-thumb { background: #1f1f1d; }
+  .nx-card:hover .nx-thumb {
+    transform: scale(0.985);
+    box-shadow:
+      0 0 0 1px rgba(var(--shadow-color), 0.05),
+      0 14px 30px -16px rgba(var(--shadow-color), 0.2);
+  }
+  .nx-thumb video {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+  }
+  .nx-card h3 {
+    font-size: 30px; font-weight: 500;
+    margin: 0 0 10px; letter-spacing: -0.02em; line-height: 1.1;
+    color: var(--ink);
+  }
+  .nx-card .nx-desc {
+    font-size: 16px; color: var(--ink-soft);
+    margin: 0 0 20px; line-height: 1.5; letter-spacing: -0.005em;
+    max-width: 95%;
+  }
+  .nx-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .nx-chip {
+    font-size: 13px; padding: 7px 14px; border-radius: 999px;
+    background: var(--chip); color: var(--chip-ink);
+    letter-spacing: -0.005em;
+  }
+
+  /* ─── Responsive ───────────────────────────── */
+  @media (max-width: 1080px) {
+    .cs-hero { padding: 150px 48px 90px; }
+    .cs-hero-inner { grid-template-columns: 1fr; gap: 56px; }
+    section.cs { padding: 100px 48px; }
+    .cs-two { grid-template-columns: 1fr; gap: 40px; }
+    .cs-two.flip > *:first-child { order: 1; }
+    .cs-two.flip > *:last-child { order: 2; }
+    .cs-feature { grid-template-columns: 1fr; gap: 32px; }
+    .cs-feature.flip .cs-feature-text,
+    .cs-feature.flip .cs-feature-visual { order: initial; }
+    .cs-insights, .cs-hmw, .cs-priorities, .cs-tradeoffs { grid-template-columns: 1fr 1fr; }
+    .cs-meta { grid-template-columns: repeat(2, 1fr); gap: 24px 32px; }
+    .cs-trow, .cs-solcard { grid-template-columns: 1fr; gap: 36px; padding: 40px; }
+    .cs-trow.flip .cs-trow-media, .cs-trow.flip .cs-trow-body { order: initial; }
+    .cs-istat:nth-child(even) { transform: none; }
+    .cs-istat:nth-child(even):hover { transform: translateY(-4px); }
+    .cs-impact { grid-template-columns: repeat(2, 1fr); border-bottom: none; }
+    .cs-stat { border-right: none; border-bottom: 1px solid var(--line); }
+    .cs-reflect { grid-template-columns: 1fr; gap: 48px; }
+    .cs-outro { padding: 100px 48px 120px; }
+    footer { padding: 36px 48px 28px; }
+  }
+  @media (max-width: 720px) {
+    .topbar { padding: 0 20px; height: 92px; }
+    .nav { padding: 4px; gap: 0; }
+    .nav a { padding: 8px 12px; font-size: 14px; }
+    .cs-hero { padding: 140px 20px 80px; }
+    section.cs { padding: 80px 20px; }
+    .cs-meta { grid-template-columns: 1fr; }
+    .cs-split, .cs-ba { grid-template-columns: 1fr; }
+    .cs-insights, .cs-hmw, .cs-priorities, .cs-tradeoffs { grid-template-columns: 1fr; }
+    .cs-qgrid, .cs-impact2, .cs-learn { grid-template-columns: 1fr; }
+    .nx-grid { grid-template-columns: 1fr; gap: 48px; }
+    .cs-impact-rects { grid-template-columns: 1fr; }
+    .cs-trow, .cs-solcard { padding: 28px; }
+    .cs-trow-body dl { grid-template-columns: 88px 1fr; gap: 12px 16px; }
+    .cs-trow-media.stack { padding: 0; }
+    .cs-trow-media.stack .m1 { width: 100%; }
+    .cs-trow-media.stack .m2 { position: static; width: 66%; margin: -32px 0 0 auto; display: block; }
+    .cs-impact { grid-template-columns: 1fr; }
+    .cs-quote { padding: 40px 28px; border-radius: 18px; }
+    .cs-outro { padding: 80px 20px 100px; }
+    .footer-grid { grid-template-columns: 1fr; gap: 36px; }
+    .footer-contact { align-items: flex-start; text-align: left; }
+  }
+</style>
+</head>
+<body class="case-study">
+
+  <div class="cursor" id="cursor" aria-hidden="true"></div>
+
+  <div class="topbar">
+    <a href="index.html" class="logo" id="logo" aria-label="emily jeng — home">
+      <img src="logo.png" alt="EJ monogram" />
+      <span class="logo-tip" aria-hidden="true">my initials in matcha latte art!</span>
+    </a>
+    <nav class="nav" aria-label="primary">
+      <a href="index.html" class="active">work</a>
+      <a href="About.html">about</a>
+      <a href="https://drive.google.com/file/d/1XWTcUoySuBTdaDb6yGjlllJwRnUw0Gn8/view?usp=drive_link" target="_blank" rel="noopener" class="external">resume</a>
+      <button class="theme-toggle" id="themeToggle" aria-label="toggle dark mode">
+        <span class="flipper">
+          <span class="face front" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+          </span>
+          <span class="face back" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+          </span>
+        </span>
+      </button>
+    </nav>
+  </div>
+
+  <main>
+
+    <!-- ═══════ HERO ═══════ -->
+    <section class="cs-hero" data-screen-label="00 Hero">
+      <div class="cs-hero-inner">
+        <div class="cs-hero-head">
+          <span class="cs-brandmark" aria-hidden="true">
+            <img src="media/voxbee/green-logo.png" alt="Voxbee logo" />
+          </span>
+          <span class="cs-status"><span class="dot"></span>Shipped</span>
+        </div>
+        <h1>Voxbee</h1>
+        <p class="lede">Leading the full web redesign of Voxbee, an AI-powered dubbing and voice cloning tool, in order to establish credibility, build a professional brand identity, and increase conversion amongst content creators.</p>
+        <dl class="cs-meta">
+          <div class="cs-meta-card"><dt>Role</dt><dd>UI/UX Design Lead</dd></div>
+          <div class="cs-meta-card"><dt>Timeline</dt><dd>Jun. 2025 – Aug. 2025</dd></div>
+          <div class="cs-meta-card"><dt>Platform</dt><dd>Web</dd></div>
+          <div class="cs-meta-card skills"><dt>Skills</dt><dd style="color: rgb(107, 107, 102); font-family: &quot;Albert Sans&quot;; font-weight: 400; height: 90px">UX design<br />User research / testing<br />Brand Development<br />Content Strategy</dd></div>
+        </dl>
+        <div class="cs-hero-visual">
+          <video src="media/voxbee/hero.mp4" autoplay loop muted playsinline preload="metadata" aria-label="Voxbee redesigned site walkthrough"></video>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ═══════ 01 · The Project ═══════ -->
+    <section class="cs" id="context" data-screen-label="01 Context" data-frame="Section 2">
+      <div class="cs-inner">
+        <span class="cs-num">01 | Background</span>
+        <h2 class="cs-title">Voxbee is a dubbing tool helping creators <span class="ital">break language barriers</span> and reach global audiences.</h2>
+        <div class="cs-body" style="max-width: none;">
+          <p style="font-size: 18px; line-height: 1.6">As the flagship product of <strong>Xccelerated AI</strong>, Voxbee gives content creators a way to translate their videos and voices, while maintaining their unique tone, texture, and personality that makes them <em>them</em>.</p>
+        </div>
+        <figure class="cs-bg-figure">
+          <img src="media/voxbee/background-banner.png" alt="Voxbee redesigned screens localizing video across languages" />
+        </figure>
+      </div>
+    </section>
+
+
+    <!-- ═══════ 02 · Problem ═══════ -->
+    <section class="cs" id="problem" data-screen-label="02 Problem">
+      <div class="cs-inner">
+        <span class="cs-num">02 | Problem</span>
+        <h2 class="cs-title">The website failed to engage and convert users.</h2>
+        <p class="cs-lede" style="font-size: 18px; line-height: 1.6">Three months after launch, Voxbee still struggled with user engagement, onboarding clarity, and converting visitors into active users. To combat this, the team proposed a complete redesign with fresher visuals and sharper content.</p>
+
+        <div class="cs-split">
+          <div class="cs-pane wanted">
+            <h4>Stakeholders wanted to see</h4>
+            <ul>
+              <li>A <strong>clean &amp; professional</strong> visual identity</li>
+              <li>An <strong>industry-standard</strong> site structure</li>
+              <li>Messaging <strong>tailored towards content creators</strong></li>
+            </ul>
+          </div>
+          <div class="cs-pane disliked">
+            <h4>Stakeholders did not like</h4>
+            <ul>
+              <li>Lack of professional appeal</li>
+              <li>Cluttered &amp; unpolished structure</li>
+              <li>Unclear language, identity, and messaging</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Guiding question — band that sits exactly between 02 and 03 -->
+    <div class="cs-guiding">
+      <span class="gq-eyebrow">Our guiding question</span>
+      <p class="gq-text">How might we create a more <span class="ital">intuitive and trustworthy</span> website experience that clearly communicates Voxbee's value to content creators?</p>
+    </div>
+
+
+    <!-- ═══════ 03 · Research ═══════ -->
+    <section class="cs" id="research" data-screen-label="03 Research" data-frame="Section 3">
+      <div class="cs-inner">
+        <span class="cs-num">03 | Research</span>
+        <h2 class="cs-title">First, I studied how the category leaders earn creator trust.</h2>
+        <p class="cs-lede" style="font-size: 18px; line-height: 1.6">I ran a competitive analysis of leading AI voice and dubbing platforms, examining how they structure their pages, surface demos, and speak to creators.</p>
+
+        <div class="cs-logowall">
+          <div class="cs-logos">
+            <img class="cs-logo lg-eleven" src="media/logos/elevenlabs.svg" alt="ElevenLabs" />
+            <img class="cs-logo lg-heygen" src="media/logos/heygen.svg" alt="HeyGen" />
+            <img class="cs-logo lg-synth" src="media/logos/synthesia.png" alt="Synthesia" />
+          </div>
+        </div>
+
+        <div class="cs-body" style="max-width: none;">
+          <p style="font-size: 18px; line-height: 1.6; font-weight: 400">After auditing similar platforms, we decided to focus on the three patterns that consistently won creators over: <strong>demos shown before the ask</strong>, <strong>a linear page structure</strong>, and <strong>plain-spoken, creator-first language</strong>. The strongest sites earned trust on first impression by showing the output instead of describing it and by stripping away the dense, feature-listing layouts that made Voxbee's original site feel overwhelming.</p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ═══════ 04 · Empathize ═══════ -->
+    <section class="cs bg-soft" id="empathize" data-screen-label="04 Empathize" data-frame="Section 4">
+      <div class="cs-inner">
+        <span class="cs-num">04 | Empathize</span>
+        <h2 class="cs-title">Before sketching anything, I wanted to hear it from <span class="ital">actual creators.</span></h2>
+        <p class="cs-lede" style="font-size: 18px; line-height: 1.6">To ensure the redesign was guided by actual user input, I led <strong>6 user interviews</strong> with content creators, walking them through the existing site and taking note on what landed, what confused them, and whether they'd trust this product.</p>
+
+        <div class="cs-qgrid">
+          <div class="cs-qcard">
+            <span class="qi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.6.6 1 1.3 1 2.1V16h6v-.4c0-.8.4-1.5 1-2.1A6 6 0 0 0 12 3Z"/></svg></span>
+            <p>What are your initial thoughts when landing on the site?</p>
+          </div>
+          <div class="cs-qcard">
+            <span class="qi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.6.6 1 1.3 1 2.1V16h6v-.4c0-.8.4-1.5 1-2.1A6 6 0 0 0 12 3Z"/></svg></span>
+            <p>Is it easy to navigate and find what you're looking for?</p>
+          </div>
+          <div class="cs-qcard">
+            <span class="qi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.6.6 1 1.3 1 2.1V16h6v-.4c0-.8.4-1.5 1-2.1A6 6 0 0 0 12 3Z"/></svg></span>
+            <p>Does this feel like something made for you as a content creator?</p>
+          </div>
+          <div class="cs-qcard">
+            <span class="qi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.6.6 1 1.3 1 2.1V16h6v-.4c0-.8.4-1.5 1-2.1A6 6 0 0 0 12 3Z"/></svg></span>
+            <p>Would you trust this product? Why or why not?</p>
+          </div>
+        </div>
+
+        <h3 class="cs-subhead">Three key insights surfaced across all 6 participants:</h3>
+
+        <div class="cs-panel">
+        <div class="cs-insights">
+          <div class="cs-insight">
+            <span class="ix">Insight 01</span>
+            <h4>Low perceived trust &amp; credibility</h4>
+            <p class="qt">"I'd need to see examples or demonstrations before committing to this."</p>
+          </div>
+          <div class="cs-insight">
+            <span class="ix">Insight 02</span>
+            <h4>Cluttered &amp; overwhelming experience</h4>
+            <p class="qt">"There's a lot going on. I'm not sure where to look."</p>
+          </div>
+          <div class="cs-insight">
+            <span class="ix">Insight 03</span>
+            <h4>Not tailored to content creators</h4>
+            <p class="qt">"This doesn't really feel like it's made for someone like me."</p>
+          </div>
+        </div>
+        </div>
+
+        <p class="cs-after-note" style="font-size: 18px; line-height: 1.6">These insights revealed that the core issue wasn't just visual. The issue was a lack of <strong>clarity</strong>, <strong>focus</strong>, and <strong>creator-centered communication.</strong></p>
+      </div>
+    </section>
+
+
+    <!-- ═══════ 04 · Scoping the Work ═══════ -->
+    <section class="cs bg-mint" id="scope" data-screen-label="05 Scope" data-frame="Section 5">
+      <div class="cs-inner">
+        <span class="cs-num">05 | Scoping the Work</span>
+        <h2 class="cs-title">Narrowing in on the <span class="ital">highest-impact</span> areas first.</h2>
+        <p class="cs-lede" style="font-size: 18px">With both stakeholder input and user insights in hand, I scoped the project around the three areas that would most directly address user confusion and then mapped lower-priority work behind them.</p>
+
+        <div class="cs-panel">
+        <div class="cs-priorities">
+          <div class="cs-priority">
+            <span class="pn">1</span>
+            <h4>Landing page redesign</h4>
+            <p>First point of contact. Biggest opportunity to improve clarity, trust, and engagement.</p>
+          </div>
+          <div class="cs-priority">
+            <span class="pn">2</span>
+            <h4>Messaging &amp; content strategy</h4>
+            <p>Refocusing language to speak directly to content creators and clarify Voxbee's value.</p>
+          </div>
+          <div class="cs-priority">
+            <span class="pn">3</span>
+            <h4>Visual system &amp; brand direction</h4>
+            <p>Establishing a clean, professional identity that earns credibility on first impression.</p>
+          </div>
+
+          <span class="cs-priorities-row-label">Lower priority — still important</span>
+
+          <div class="cs-priority lower">
+            <span class="pn">4</span>
+            <h4>Secondary pages</h4>
+            <p>Features, pricing, enterprise — the standard pages users expect on a product site.</p>
+          </div>
+          <div class="cs-priority lower">
+            <span class="pn">5</span>
+            <h4>Interactive demo content</h4>
+            <p>Hands-on examples to give creators a real feel for what Voxbee can do.</p>
+          </div>
+          <div class="cs-priority lower note-cell" style="background: transparent; border: none;">
+            <p style="font-size: 14.5px; line-height: 1.6; color: var(--ink-soft); margin: 0; max-width: 280px;">Allocating efforts this way meant we could ship the most critical pain points within an 8-week window without dropping the supporting structure!</p>
+          </div>
+        </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ═══════ 05 · Decisions & Tradeoffs ═══════ -->
+    <section class="cs" id="tradeoffs" data-screen-label="06 Tradeoffs" data-frame="Section 6">
+      <div class="cs-inner">
+        <span class="cs-num">06 | Decisions &amp; Tradeoffs</span>
+        <h2 class="cs-title">Three intentional tradeoffs shaped the final designs.</h2>
+
+        <div class="cs-trows">
+          <div class="cs-trow">
+            <div class="cs-trow-media">
+              <img src="media/voxbee/feat-tts.png" alt="Text-to-Speech demo with preset texts and voices" />
+            </div>
+            <div class="cs-trow-body">
+              <h4>Tradeoff 01: Text-to-Speech demo</h4>
+              <dl>
+                <dt>Decision</dt><dd>Simplified the demo to preset texts and voices.</dd>
+                <dt>Why</dt><dd>Free-text and open language input wasn't feasible for engineering within the 8-week window.</dd>
+                <dt>Tradeoff</dt><dd>Users have less flexibility, but still get to experience the feature before signing up.</dd>
+              </dl>
+            </div>
+          </div>
+
+          <div class="cs-trow flip">
+            <div class="cs-trow-media stack">
+              <img class="m1" src="media/voxbee/feat-dubbing.png" alt="AI Video Dubbing interactive preview" />
+              <img class="m2" src="media/voxbee/feat-voice-cloning.png" alt="AI Voice Cloning interactive preview" />
+            </div>
+            <div class="cs-trow-body">
+              <h4>Tradeoff 02: Trust over decoration</h4>
+              <dl>
+                <dt>Decision</dt><dd>Prioritized proof points and interactive demos over purely aesthetic visuals.</dd>
+                <dt>Why</dt><dd>Credibility was the #1 concern surfaced in user research.</dd>
+                <dt>Tradeoff</dt><dd>Required heavier dev coordination and more time to design interactive demos.</dd>
+              </dl>
+            </div>
+          </div>
+
+          <div class="cs-trow">
+            <div class="cs-trow-media framed">
+              <img src="media/voxbee/feat-creators.png" alt="Voxbee is not just another AI tool — creator-focused messaging" />
+            </div>
+            <div class="cs-trow-body">
+              <h4>Tradeoff 03: Clarity over complexity</h4>
+              <dl>
+                <dt>Decision</dt><dd>Prioritized clear messaging and usability over visually bold or dense design.</dd>
+                <dt>Why</dt><dd>Users were overwhelmed at first glance They needed to understand Voxbee before being impressed by it.</dd>
+                <dt>Tradeoff</dt><dd>Reduced visual boldness in favor of comprehension.</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ═══════ 06 · Key Improvements ═══════ -->
+    <section class="cs bg-soft" id="improvements" data-screen-label="07 Improvements" data-frame="Section 7">
+      <div class="cs-inner">
+        <span class="cs-num">07 | Key Improvements</span>
+        <h2 class="cs-title">Key improvements <span class="ital">side-by-side.</span></h2>
+        <p class="cs-lede" style="font-size: 18px">Guided by user insights, stakeholder input, and feature prioritization, several major improvements were made from the original site to the redesign.</p>
+
+        <article class="cs-imp">
+          <div class="cs-imp-head">
+            <span class="imp-num">01</span>
+            <div>
+              <h3>Clean &amp; professional visual identity</h3>
+            </div>
+          </div>
+          <div class="cs-ba">
+            <figure class="frame before crop">
+              <span class="label">Before</span>
+              <img src="media/voxbee/imp1-before.png" alt="Old Voxbee landing — dense text on a flat block" />
+              <p class="cap">Users expressed feeling overwhelmed and confused by the dense blocks of text and unfocused structure of the original site, which resulted in quick drop-off and low perceived trust.</p>
+            </figure>
+            <figure class="frame after crop">
+              <span class="label">After</span>
+              <img src="media/voxbee/imp1-after.png" alt="Redesigned Voxbee landing — clear hero with video preview" />
+              <p class="cap">To combat this, the redesign features digestible chunks of information, a refined visual identity, and an organized information architecture.</p>
+            </figure>
+          </div>
+        </article>
+
+        <article class="cs-imp">
+          <div class="cs-imp-head">
+            <span class="imp-num">02</span>
+            <div>
+              <h3>Focused messaging, tailored to creators</h3>
+              <p>Users previously felt the website wasn't creator-friendly and that the language felt disjointed. The new messaging shifts away from simply explaining Voxbee's mission and functionalities toward more connected language that showcases how Voxbee could enhance content creators' global reach.</p>
+            </div>
+          </div>
+          <div class="cs-ba">
+            <figure class="frame before">
+              <span class="label">Before — Mission-first</span>
+              <div class="quote-card mission">
+                <p>"We're on a mission to humanize AI voice dubbing — driving more views, expanding your reach, and winning more fans."</p>
+              </div>
+            </figure>
+            <figure class="frame after">
+              <span class="label">After — Creator-first</span>
+              <div class="quote-card creator">
+                <p>"Voxbee helps creators grow their brand globally with AI video and audio tools that sound just like you — tone, texture, and all."</p>
+              </div>
+            </figure>
+          </div>
+        </article>
+
+        <article class="cs-imp">
+          <div class="cs-imp-head">
+            <span class="imp-num">03</span>
+            <div>
+              <h3>Industry-standard pages, added</h3>
+              <p>With only Landing, Pricing, and Sign in pages, the previous site made users and stakeholders question the professionalism and credibility of Voxbee. The new site adds Enterprise, FAQ, Demo Booking, Contact, and Resources pages.</p>
+            </div>
+          </div>
+          <div class="cs-ba">
+            <figure class="frame before dark-ui crop">
+              <span class="label">Before — Only landing, pricing &amp; sign in</span>
+              <img src="media/voxbee/imp3-before.png" alt="Old Voxbee site — single dark landing page" />
+            </figure>
+            <figure class="frame after">
+              <span class="label">After — Complete industry-standard site</span>
+              <div class="pages-grid">
+                <img src="media/voxbee/imp3-after-1.png" alt="Discover page" />
+                <img src="media/voxbee/imp3-after-2.png" alt="Built for Creators page" />
+                <img src="media/voxbee/imp3-after-3.png" alt="Pricing page" />
+                <img src="media/voxbee/imp3-after-4.png" alt="Enterprise page" />
+              </div>
+            </figure>
+          </div>
+        </article>
+
+        <article class="cs-imp">
+          <div class="cs-imp-head">
+            <span class="imp-num">04</span>
+            <div>
+              <h3>Interactive demos that build trust</h3>
+              <p>In interviews, many creators expressed wariness due to a lack of demonstrations and examples. So we took it a step further by introducing interactive demonstrations that let creators tinker with the features first-hand and build familiarity trust before committing.</p>
+            </div>
+          </div>
+          <div class="cs-ba equal-media">
+            <figure class="frame before dark-ui crop">
+              <span class="label">Before — Static explanations</span>
+              <img src="media/voxbee/imp4-before.png" alt="Old Voxbee site — static Cool Add-ons section" />
+            </figure>
+            <figure class="frame after crop">
+              <span class="label">After — Interactive demonstrations</span>
+              <video src="media/voxbee/imp4-after.mp4" autoplay loop muted playsinline preload="metadata" aria-label="Redesigned interactive demo"></video>
+            </figure>
+          </div>
+        </article>
+      </div>
+    </section>
+
+
+    <!-- ═══════ 07 · The Solution ═══════ -->
+    <section class="cs bg-mint" id="solution" data-screen-label="08 Solution" data-frame="Section 8">
+      <div class="cs-inner">
+        <span class="cs-num">08 | FINAL SOLUTION</span>
+        <h2 class="cs-title">A site that earns trust on first impression and speaks to <span class="ital">creators first.</span></h2>
+
+        <div class="cs-sol">
+          <div class="cs-solcard">
+            <div class="cs-solcard-text">
+              <h3>Clear Value Proposition for Creators</h3>
+              <p class="body">An engaging first impression that introduces the product, highlights its benefits, and gives creators an overview of how it works in simple terms.</p>
+            </div>
+            <div class="media">
+              <video src="media/voxbee/solution-1.mp4" autoplay loop muted playsinline preload="metadata" aria-label="Voxbee landing walkthrough"></video>
+            </div>
+          </div>
+
+          <div class="cs-solcard">
+            <div class="cs-solcard-text">
+              <h3>Building Trust through Demos</h3>
+              <p class="body">An interactive breakdown of Voxbee's tools that lets users explore the product hands-on. Real demos build credibility by showing, not just telling, how the dubbing and voice cloning work.</p>
+            </div>
+            <div class="media">
+              <video src="media/voxbee/imp4-after.mp4" autoplay loop muted playsinline preload="metadata" aria-label="Interactive feature demos"></video>
+            </div>
+          </div>
+
+          <div class="cs-solcard">
+            <div class="cs-solcard-text">
+              <h3>Pricing Plans</h3>
+              <p class="body">A clear overview of pricing tiers designed to fit different needs, helping users quickly understand which plan works best for their workflow and scale.</p>
+            </div>
+            <div class="media">
+              <video src="media/voxbee/solution-3.mp4" autoplay loop muted playsinline preload="metadata" aria-label="Pricing plans walkthrough"></video>
+            </div>
+          </div>
+
+          <div class="cs-solcard">
+            <div class="cs-solcard-text">
+              <h3>Built for Scale</h3>
+              <p class="body">Tailored messaging for enterprise teams, showcasing Voxbee's value for large organizations.</p>
+            </div>
+            <div class="media">
+              <video src="media/voxbee/solution-4.mp4" autoplay loop muted playsinline preload="metadata" aria-label="Enterprise experience walkthrough"></video>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ═══════ 08 · Impact ═══════ -->
+    <section class="cs" id="impact" data-screen-label="09 Impact" data-frame="Section 9">
+      <div class="cs-inner">
+        <span class="cs-num">09 | Impact</span>
+        <h2 class="cs-title">The redesign moved from kickoff to developer-ready in two months and resulted in:</h2>
+
+        <div class="cs-impact-rects">
+          <div class="ic-rect">
+            <span class="ic-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10 18.5h4"/></svg></span>
+            <p>15 redesigned web screens</p>
+          </div>
+          <div class="ic-rect">
+            <span class="ic-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8.5" cy="9" r="2.5"/><circle cx="16" cy="7.5" r="2"/><path d="M3.5 19v-1.5a4 4 0 0 1 4-4h2a4 4 0 0 1 4 4V19"/><path d="M15 13.2a3.4 3.4 0 0 1 5.5 2.7V18"/></svg></span>
+            <p>6 content creators interviewed</p>
+          </div>
+          <div class="ic-rect">
+            <span class="ic-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2.8h6V4"/><path d="M8.5 11l1.8 1.8L14 9"/><path d="M8.5 16.5h7"/></svg></span>
+            <p>Developer-ready in 8 weeks</p>
+          </div>
+          <div class="ic-rect">
+            <span class="ic-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7.5" r="2.6"/><circle cx="5" cy="10" r="2"/><circle cx="19" cy="10" r="2"/><path d="M7.5 19.5v-1a4.5 4.5 0 0 1 9 0v1"/><path d="M2.5 18.5a3 3 0 0 1 3.5-3"/><path d="M21.5 18.5a3 3 0 0 0-3.5-3"/></svg></span>
+            <p>15% increase in engagement &amp; demo requests</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ═══════ 09 · Learnings ═══════ -->
+    <section class="cs bg-soft" id="learnings" data-screen-label="10 Learnings" data-frame="Section 10">
+      <div class="cs-inner">
+        <span class="cs-num">10 | Learnings</span>
+        <h2 class="cs-title">Learnings to take going forward!</h2>
+
+        <div class="cs-learn">
+          <div class="cs-learncard">
+            <h4>Turning ambiguity into clarity</h4>
+            <p>Starting with an unclear brief from stakeholders, I was pushed to take initiative, set up meetings, ask better questions, and build a habit of speaking up early when things don't add up.</p>
+          </div>
+          <div class="cs-learncard">
+            <h4>Effectively communicating with developers</h4>
+            <p>The best designs are the ones that ship! Learning to balance user needs with technical constraints by communicating closely with developers was essential.</p>
+          </div>
+          <div class="cs-learncard">
+            <h4>Clear messaging is the foundation of good design</h4>
+            <p>No matter how strong the visuals, users need to understand the product first. Clarity will always beat flash.</p>
+          </div>
+          <div class="cs-learncard">
+            <h4>Being a stronger leader</h4>
+            <p>This was my first time as a design lead. I learned how to trust my teammates, delegate effectively, and act as the connective tissue between design, engineering, PM, and stakeholders.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════ More work ═══════ -->
+    <section class="cs" id="more-work" data-screen-label="More work">
+      <div class="cs-inner">
+        <h2 class="cs-title" style="font-size: 19px; font-weight: 400; line-height: 1.6; letter-spacing: -0.005em; color: var(--ink-soft);">Like what you've seen? Check out some of my <span class="ital">other projects!</span></h2>
+        <div class="nx-grid">
+          <a class="nx-card" href="FLY.html">
+            <div class="nx-thumb">
+              <video src="media/fly-thumb.mp4" autoplay loop muted playsinline preload="metadata"></video>
+            </div>
+            <h3>Fresh Lifelines for Youth</h3>
+            <p class="nx-desc">Supporting system-impacted youth through education and goal-tracking.</p>
+          </a>
+          <a class="nx-card" href="index.html#work">
+            <div class="nx-thumb">
+              <video src="media/clubhouse.mp4" autoplay loop muted playsinline preload="metadata"></video>
+            </div>
+            <h3>ClubHouse</h3>
+            <p class="nx-desc">A platform for students to discover, rate, and review UCLA organizations.</p>
+          </a>
+        </div>
+      </div>
+    </section>
+
+
+  </main>
+
+  <footer id="footer">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="name-row" href="index.html">
+          <img src="logo.png" alt="" />
+          <span class="name">emily jeng</span>
+        </a>
+        <div class="meta">
+          <span id="sunMoonGlyph" class="sun-glyph">☀</span>
+          <span id="clock">—:—&nbsp;PM</span>
+          <span class="dot">·</span>
+          <span>Bay Area</span>
+        </div>
+      </div>
+
+      <nav class="footer-nav" aria-label="footer">
+        <a href="index.html">Work</a>
+        <a href="About.html">About</a>
+        <a href="https://drive.google.com/file/d/1XWTcUoySuBTdaDb6yGjlllJwRnUw0Gn8/view?usp=drive_link" target="_blank" rel="noopener">Resume</a>
+      </nav>
+
+      <div class="footer-contact">
+        <span class="greeting">let's whisk up something great together! 🍵</span>
+        <div class="socials">
+          <a href="https://www.linkedin.com/in/emily-jeng-6568b820b/" target="_blank" rel="noopener" aria-label="LinkedIn">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="3" y="3" width="18" height="18" rx="3.6" fill="currentColor"/>
+              <rect x="6.55" y="10" width="2.36" height="7.4" fill="var(--bg)"/>
+              <circle cx="7.73" cy="7.6" r="1.35" fill="var(--bg)"/>
+              <path fill="var(--bg)" d="M10.4 10h2.27v1.02h.03c.32-.6 1.09-1.25 2.25-1.25 2.41 0 2.85 1.58 2.85 3.64v4.0h-2.36v-3.55c0-.85-.02-1.94-1.18-1.94-1.18 0-1.36.92-1.36 1.88v3.61H10.4V10z"/>
+            </svg>
+          </a>
+          <a href="mailto:emily@jeng.net" aria-label="Email">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="5" width="18" height="14" rx="3.6"/>
+              <path d="M5 8.5l7 5 7-5"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="designed">
+        ⊹ ࣪ ˖ designed with lots of <span class="heart">♡</span> and blueberry matchas 🫐 ⋆. 𐙚 ˚
+      </div>
+      <div class="updated" id="updated" data-text="UPDATED 05.25.2026"></div>
+    </div>
+  </footer>
+
+<script>
+  /* ─── Nav: sliding pill ─── */
+  (function setupNav() {
+    const nav = document.querySelector('.nav');
+    if (!nav) return;
+    const pill = document.createElement('span');
+    pill.className = 'nav-pill hidden';
+    nav.prepend(pill);
+
+    const items = [...nav.querySelectorAll('a')];
+    const activeItem = () => nav.querySelector('a.active') || items[0];
+
+    function positionPill(target, instant) {
+      if (!target) return;
+      const navR = nav.getBoundingClientRect();
+      const r = target.getBoundingClientRect();
+      if (instant) pill.style.transition = 'none';
+      pill.style.left = (r.left - navR.left) + 'px';
+      pill.style.top  = (r.top  - navR.top ) + 'px';
+      pill.style.width  = r.width + 'px';
+      pill.style.height = r.height + 'px';
+      if (instant) { void pill.offsetWidth; pill.style.transition = ''; }
+    }
+    function placeActive(instant = true) { positionPill(activeItem(), instant); }
+    (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve())
+      .then(() => { placeActive(true); pill.classList.remove('hidden'); });
+    window.addEventListener('resize', () => placeActive(true));
+
+    items.forEach((a) => {
+      a.addEventListener('click', (e) => {
+        if (a.target === '_blank') return;
+        const href = a.getAttribute('href');
+        if (!href || href.startsWith('#')) return;
+        let url;
+        try { url = new URL(href, location.href); } catch { return; }
+        if (url.origin !== location.origin) return;
+        if (url.pathname === location.pathname) { positionPill(a, false); return; }
+        e.preventDefault();
+        positionPill(a, false);
+        items.forEach(i => i.classList.remove('active'));
+        a.classList.add('active');
+        setTimeout(() => { location.href = url.href; }, 480);
+      });
+    });
+  })();
+
+  /* ─── Fly-in entrance ─── */
+  (function setupFlyIn() {
+    const groups = [
+      { sel: '.cs-hero .cs-eyebrow', step: 40 },
+      { sel: '.cs-hero h1', step: 60 },
+      { sel: '.cs-hero .lede', step: 50 },
+      { sel: '.cs-hero .cs-meta-card', step: 40 },
+      { sel: '.cs-hero-visual', step: 60 }
+    ];
+    let base = 60;
+    groups.forEach(({ sel, step }) => {
+      const els = document.querySelectorAll(sel);
+      els.forEach((el, i) => {
+        el.classList.add('fly-in');
+        el.style.setProperty('--fly-delay', (base + i * step) + 'ms');
+      });
+      if (els.length) base += els.length * step + 30;
+    });
+
+    /* Scroll-triggered fly-in for everything else.
+       Lighter / staggered so the page stays calm. */
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('fly-in');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+
+    const targets = document.querySelectorAll(
+      '.cs .cs-num, .cs .cs-title, .cs .cs-lede, .cs-body p, ' +
+      '.cs-card, .cs-pane, .cs-insight, .cs-hmw-card, .cs-priority, ' +
+      '.cs-tradeoff, .cs-feature, .cs-imp, .cs-stat, .cs-reflect > *, ' +
+      '.cs-quote, .cs-figure'
+    );
+    let i = 0;
+    targets.forEach((el) => {
+      el.style.setProperty('--fly-delay', ((i % 6) * 60) + 'ms');
+      el.style.opacity = '0';
+      i++;
+      io.observe(el);
+    });
+  })();
+
+  /* ─── Cursor ─── */
+  (function setupCursor() {
+    const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    if (!fine) return;
+    const cursor = document.getElementById('cursor');
+    let tx = -50, ty = -50, cx = -50, cy = -50;
+    let active = false;
+    window.addEventListener('mousemove', (e) => {
+      tx = e.clientX; ty = e.clientY;
+      if (!active) { cx = tx; cy = ty; active = true; }
+    }, { passive: true });
+    document.addEventListener('mouseleave', () => cursor.classList.add('hidden'));
+    document.addEventListener('mouseenter', () => cursor.classList.remove('hidden'));
+    function loop() {
+      cx += (tx - cx) * 0.28;
+      cy += (ty - cy) * 0.28;
+      cursor.style.transform = `translate3d(${cx}px, ${cy}px, 0) translate(-50%, -50%)`;
+      requestAnimationFrame(loop);
+    }
+    loop();
+  })();
+
+  /* ─── Logo (spins with scroll, click → portfolio) ─── */
+  (function setupLogo() {
+    const logo = document.getElementById('logo');
+    if (!logo) return;
+    let raf = null;
+    let spinning = false;
+    function updateLogo() {
+      if (spinning) { raf = null; return; }
+      const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      const progress = Math.min(1, Math.max(0, window.scrollY / max));
+      logo.style.setProperty('--scroll-rot', (progress * 360) + 'deg');
+      raf = null;
+    }
+    window.addEventListener('scroll', () => {
+      if (raf === null) raf = requestAnimationFrame(updateLogo);
+    }, { passive: true });
+    window.addEventListener('resize', updateLogo);
+    updateLogo();
+
+    logo.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (spinning) return;
+      spinning = true;
+      logo.classList.add('spinning');
+      const href = logo.getAttribute('href');
+      const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      const curDeg = (Math.min(1, Math.max(0, window.scrollY / max))) * 360;
+      logo.style.transition = 'transform 1.1s cubic-bezier(.4,.0,.2,1)';
+      logo.style.transform = `rotate(${curDeg + 360}deg)`;
+      setTimeout(() => { location.href = href; }, 600);
+    });
+  })();
+
+  /* ─── Theme toggle ─── */
+  (function setupTheme() {
+    const toggle = document.getElementById('themeToggle');
+    const sunMoonGlyph = document.getElementById('sunMoonGlyph');
+    const stored = localStorage.getItem('theme');
+    if (stored === 'dark') document.body.classList.add('dark');
+    function syncGlyph() {
+      sunMoonGlyph.textContent = document.body.classList.contains('dark') ? '☾' : '☀';
+    }
+    syncGlyph();
+    toggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      const isDark = document.body.classList.contains('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      syncGlyph();
+    });
+  })();
+
+  /* ─── Clock ─── */
+  (function setupClock() {
+    const clockEl = document.getElementById('clock');
+    if (!clockEl) return;
+    function tickClock() {
+      const opts = { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'America/Los_Angeles' };
+      clockEl.textContent = new Date().toLocaleTimeString('en-US', opts);
+    }
+    tickClock();
+    setInterval(tickClock, 30 * 1000);
+  })();
+
+  /* ─── Rolling "UPDATED …" ─── */
+  (function setupRollingDate() {
+    const updatedEl = document.getElementById('updated');
+    if (!updatedEl) return;
+    const targetText = updatedEl.dataset.text;
+    const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.";
+    const reels = [];
+    for (const ch of targetText) {
+      if (ch === ' ') {
+        const sp = document.createElement('span');
+        sp.textContent = '\u00A0';
+        sp.style.display = 'inline-block';
+        sp.style.width = '0.4em';
+        updatedEl.appendChild(sp);
+        continue;
+      }
+      const wrap = document.createElement('span');
+      wrap.className = 'roll';
+      const reel = document.createElement('span');
+      reel.className = 'reel';
+      const tape = [];
+      const steps = 14;
+      for (let i = 0; i < steps; i++) {
+        tape.push(CHARS[Math.floor(Math.random() * CHARS.length)]);
+      }
+      tape.push(ch);
+      for (const c of tape) {
+        const s = document.createElement('span');
+        s.textContent = c;
+        reel.appendChild(s);
+      }
+      wrap.appendChild(reel);
+      updatedEl.appendChild(wrap);
+      reels.push({ wrap, reel, finalIndex: tape.length - 1 });
+    }
+    function sizeReels() {
+      reels.forEach(({ wrap, reel }) => {
+        const firstChar = reel.firstChild;
+        if (!firstChar) return;
+        const rect = firstChar.getBoundingClientRect();
+        wrap.style.width = rect.width + 'px';
+      });
+    }
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(sizeReels);
+    } else {
+      setTimeout(sizeReels, 200);
+    }
+
+    let rolled = false;
+    function rollUpdated() {
+      if (rolled) return; rolled = true;
+      reels.forEach(({ reel, finalIndex }, i) => {
+        setTimeout(() => { reel.style.transform = `translateY(-${finalIndex}em)`; }, i * 55);
+      });
+    }
+    function resetRoll() {
+      rolled = false;
+      reels.forEach(({ reel }) => {
+        reel.style.transition = 'none';
+        reel.style.transform = 'translateY(0)';
+        void reel.offsetWidth;
+        reel.style.transition = '';
+      });
+    }
+    const io2 = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) rollUpdated();
+        else if (e.intersectionRatio === 0) resetRoll();
+      }
+    }, { threshold: [0, 0.4] });
+    io2.observe(updatedEl);
+    updatedEl.addEventListener('mouseenter', () => {
+      resetRoll();
+      requestAnimationFrame(() => rollUpdated());
+    });
+  })();
+</script>
+
+</body>
+</html>
