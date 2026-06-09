@@ -898,8 +898,7 @@
       { sel: '.off-paper > *', step: 80 },
       { sel: '.communities-title', step: 80 },
       { sel: '.community', step: 110 },
-      { sel: 'footer .footer-grid > *', step: 60 },
-      { sel: 'footer .footer-bottom > *', step: 60 }
+      { sel: 'footer .footer-grid > *', step: 60 }
     ];
     groups.forEach(({ sel, step }) => {
       const els = document.querySelectorAll(sel);
@@ -919,6 +918,23 @@
       });
     }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
     reveals.forEach((el) => io.observe(el));
+
+    // Failsafe: bottom-of-page elements (the footer credit + updated date)
+    // can sit below the observer's -60px trigger line and never fire. Reveal
+    // anything actually within the viewport on load / scroll / resize.
+    function revealVisible() {
+      document.querySelectorAll('.reveal:not(.in)').forEach((el) => {
+        const r = el.getBoundingClientRect();
+        if (r.top < window.innerHeight - 4 && r.bottom > 0) {
+          el.classList.add('in');
+          io.unobserve(el);
+        }
+      });
+    }
+    window.addEventListener('scroll', revealVisible, { passive: true });
+    window.addEventListener('resize', revealVisible);
+    window.addEventListener('load', revealVisible);
+    revealVisible();
   })();
 
   /* ─── Custom circle cursor ─────────────────── */
