@@ -1518,9 +1518,14 @@
   const stored = localStorage.getItem('theme');
   if (stored === 'dark') document.body.classList.add('dark');
   function syncGlyph() {
-    sunMoonGlyph.textContent = document.body.classList.contains('dark') ? '☾' : '☀';
+    /* Footer glyph tracks Bay Area time of day (not the theme):
+       sun from 6am–7pm, moon from 7pm–6am. */
+    const laHour = parseInt(new Date().toLocaleString('en-US',
+      { hour: 'numeric', hour12: false, timeZone: 'America/Los_Angeles' }), 10) % 24;
+    sunMoonGlyph.textContent = (laHour >= 6 && laHour < 19) ? '☀' : '☾';
   }
   syncGlyph();
+  setInterval(syncGlyph, 60 * 1000);
   toggle.addEventListener('click', () => {
     document.body.classList.toggle('dark');
     const isDark = document.body.classList.contains('dark');
