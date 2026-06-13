@@ -73,11 +73,11 @@
       position: fixed;
       top: 0;
       left: 0;
-      width: 32px;
-      height: 32px;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
-      background: rgba(160, 160, 160, 0.18);
-      border: 1px solid rgba(120, 120, 120, 0.42);
+      background: rgba(190, 190, 190, 0.14);
+      border: 1px solid rgba(170, 170, 170, 0.40);
       pointer-events: none;
       z-index: 9999;
       transform: translate3d(-50px, -50px, 0) translate(-50%, -50%);
@@ -138,8 +138,8 @@
     font-weight: 400;
     letter-spacing: -0.005em;
     white-space: nowrap;
-    padding: 7px 12px;
-    border-radius: 10px;
+    padding: 8px 14px;
+    border-radius: 16px;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.25s ease, transform 0.35s cubic-bezier(.3,1.4,.4,1);
@@ -302,105 +302,245 @@
   /* ─── Page ────────────────────────────────────────────── */
   main {
     margin: 0 auto;
-    padding: 150px 96px 80px;
+    padding: 138px 96px 80px;
   }
 
   .hero {
     position: relative;
-    margin-bottom: 56px;
+    margin-bottom: 64px;
     padding: 16px 0 8px;
     isolation: isolate;
   }
-  .hero h1 {
-    font-size: clamp(36px, 4.6vw, 56px);
-    font-weight: 400;
-    line-height: 1.05;
-    letter-spacing: -0.03em;
-    margin: 0 0 18px 0;
-    text-wrap: balance;
-    position: relative;
-  }
-  .hero .tagline {
-    font-size: 18px;
-    line-height: 1.45;
-    color: var(--ink-soft);
-    margin: 0 0 10px 0;
-    max-width: 780px;
-    letter-spacing: -0.005em;
+  .hero .intro {
+    font-size: clamp(40px, 5.4vw, 61px);
+    line-height: 1.06;
+    color: var(--ink);
+    margin: 0 0 20px 0;
+    letter-spacing: -0.025em;
     font-weight: 400;
     position: relative;
   }
-  .hero .skills {
-    font-size: 13px;
-    line-height: 1.6;
-    color: var(--ink-faint);
+  .hero .headline {
+    font-size: clamp(17px, 1.95vw, 21px);
+    font-weight: 400;
+    line-height: 1.55;
+    letter-spacing: -0.006em;
     margin: 0;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    font-weight: 500;
+    max-width: 720px;
+    text-wrap: pretty;
+    color: var(--ink-soft);
     position: relative;
-    display: inline-flex;
-    flex-wrap: wrap;
-    gap: 0 12px;
-    align-items: baseline;
   }
-  .hero .skills .sep {
-    color: var(--ink-faint);
-    opacity: 0.6;
-  }
-  .hero .skills .item {
+  .hero .headline strong { font-weight: 600; color: var(--ink-soft); }
+
+  /* ─── Tea cup ─────────────────────────────────────────── */
+  .teacup-wrap {
+    position: relative;
     display: inline-block;
-  }
-  .sparkle {
-    color: #a8c46a;
-    font-size: 0.92em;
+    vertical-align: baseline;
     margin-left: 4px;
   }
-  body.dark .sparkle { color: #c4dd86; }
-
-  /* Delight phrase — proximity-based color tint, sparkle on hover */
-  .delight {
-    cursor: default;
-    color: var(--ink-faint);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    font-weight: 500;
+  .teacup {
+    appearance: none;
+    border: none;
+    background: none;
+    padding: 0;
+    margin: 0;
     display: inline-block;
+    vertical-align: baseline;
+    line-height: 0;
+    color: var(--ink-soft);
   }
-  .delight .ch {
-    display: inline-block;
-    transition: color 0.18s ease-out;
+  .teacup svg {
+    width: 66px;
+    height: 45px;
+    display: block;
+    overflow: visible;
+    transition: transform 0.3s cubic-bezier(.3,1.4,.4,1);
   }
-  .delight .ch.space { width: 0.34em; }
-  .delight .spark {
-    display: inline-block;
-    color: #a8c46a;
-    margin-left: 8px;
+  .teacup:hover svg { transform: translateY(-1px) scale(1.07); }
+  .cup-stroke {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 0.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .cup-liquid {
+    fill: #c8c8c2;
+    transition: fill 0.5s ease;
+  }
+  body.dark .cup-liquid { fill: #47473f; }
+  .steam .wisp {
+    fill: none;
+    stroke: var(--ink-soft);
+    stroke-width: 1.1;
+    stroke-linecap: round;
     opacity: 0;
-    transform: scale(0.4) rotate(-30deg);
-    transition: opacity 0.45s ease, transform 0.5s cubic-bezier(.2,1.8,.5,1);
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
   }
-  body.dark .delight .spark { color: #c4dd86; }
-  .delight.active .spark {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
+  @media (prefers-reduced-motion: no-preference) {
+    .steam .w1 { animation: steam 2.1s ease-in-out infinite; }
+    .steam .w2 { animation: steam 2.5s ease-in-out infinite 0.4s; }
+    .steam .w3 { animation: steam 2.3s ease-in-out infinite 0.8s; }
+  }
+  @keyframes steam {
+    0%   { opacity: 0; transform: translateY(2px) scaleY(0.7); }
+    20%  { opacity: 0.5; }
+    60%  { opacity: 0.28; }
+    100% { opacity: 0; transform: translateY(-4px) scaleY(1.15); }
   }
 
-  /* Intuitive interaction — letters lean toward the cursor */
+  /* ─── Brew bubble ─────────────────────────────────────── */
+  .brew-bubble {
+    position: absolute;
+    bottom: calc(100% + 12px);
+    left: 50%;
+    transform: translateX(-50%) translateY(6px) scale(0.96);
+    transform-origin: bottom center;
+    background: #e9e8e2;
+    color: #4a4a45;
+    border-radius: 18px;
+    padding: 9px 13px;
+    white-space: nowrap;
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: -0.005em;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.35s cubic-bezier(.3,1.5,.4,1);
+    box-shadow: 0 8px 22px -8px rgba(0,0,0,0.18);
+    z-index: 60;
+  }
+  body.dark .brew-bubble {
+    background: #2a2a27;
+    color: #c2c1b8;
+  }
+  .brew-bubble::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #e9e8e2;
+  }
+  body.dark .brew-bubble::after {
+    border-top-color: #2a2a27;
+  }
+  .teacup-wrap.show-bubble .brew-bubble {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+  .brew-q { cursor: pointer; }
+  .brew-options { display: none; gap: 6px; }
+  .teacup-wrap.open .brew-q { display: none; }
+  .teacup-wrap.open .brew-options { display: flex; }
+  .brew-options button {
+    appearance: none;
+    border: none;
+    font: inherit;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 11px;
+    border-radius: 999px;
+    background: #F5F5F5;
+    color: inherit;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .brew-options button:hover { background: #d4d4cd; }
+  body.dark .brew-options button { background: rgba(255,255,255,0.08); }
+  body.dark .brew-options button:hover { background: rgba(255,255,255,0.15); }
+  .brew-options .swatch {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.08) inset;
+  }
+
+  /* ─── intuitive interaction — letters lean toward cursor ─── */
   .intuitive {
     cursor: default;
-    display: inline-block;
     color: inherit;
+    transition: color 0.3s ease;
   }
+  .intuitive { white-space: nowrap; }
+  .intuitive .lean-word { display: inline-block; }
   .intuitive .ch {
     display: inline-block;
     transition: transform 0.25s cubic-bezier(.3,1.6,.5,1), color 0.3s ease;
     transform-origin: 50% 100%;
     will-change: transform;
   }
-  .intuitive .ch.space { width: 0.28em; }
-  .intuitive:hover { color: #7d9c4a; }
-  body.dark .intuitive:hover { color: #c4dd86; }
+  .hero .headline strong.intuitive:hover { color: #7d9c4a; }
+  body.dark .hero .headline strong.intuitive:hover { color: #c4dd86; }
+
+  /* ─── "human behavior" — thinking bubbles pop out ─── */
+  .think-wrap { position: relative; }
+  .think-wrap strong { font-style: normal; }
+  .slant { display: inline-block; transform: skewX(0deg); transition: transform 0.4s cubic-bezier(.2,.7,.3,1); transform-origin: left center; }
+  .think-wrap:hover .slant, .sparkle-wrap:hover .slant { transform: skewX(-11deg); }
+  .thoughts {
+    position: absolute;
+    left: calc(100% + 2px);
+    bottom: 1.0em;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+  .tdot, .tcloud {
+    position: absolute;
+    opacity: 0;
+    transform: scale(0.2);
+    transform-origin: center;
+    transition: opacity 0.25s ease, transform 0.42s cubic-bezier(.3,1.7,.5,1);
+    transition-delay: 0s;
+  }
+  .tdot {
+    border-radius: 50%;
+    background: #ffffff;
+    filter: drop-shadow(0 0 0.8px rgba(26,26,24,0.5)) drop-shadow(0 0 0.8px rgba(26,26,24,0.5));
+  }
+  body.dark .tdot {
+    background: #f4f4ef;
+  }
+  .tdot.d1 { width: 3px; height: 3px; left: 1px; bottom: 2px; }
+  .tdot.d2 { width: 6px; height: 6px; left: 5px; bottom: 7px; }
+  .tcloud { left: 9px; bottom: 15px; width: 29px; height: 20px; }
+  .tcloud svg {
+    width: 29px; height: 20px; display: block;
+    filter: drop-shadow(0 0 0.8px rgba(26,26,24,0.5)) drop-shadow(0 0 0.8px rgba(26,26,24,0.5));
+  }
+  .tcloud .cloud-shadow { display: none; }
+  .tcloud .cloud-body circle { fill: #ffffff; }
+  body.dark .tcloud .cloud-body circle { fill: #f4f4ef; }
+  .think-wrap:hover .tdot, .think-wrap:hover .tcloud { opacity: 1; transform: scale(1); }
+  .think-wrap:hover .d1 { transition-delay: 0.02s; }
+  .think-wrap:hover .d2 { transition-delay: 0.14s; }
+  .think-wrap:hover .tcloud { transition-delay: 0.28s; }
+
+  /* ─── "delightful experiences" — sparkle on hover ─── */
+  .sparkle-wrap { position: relative; }
+  .spk {
+    display: inline-block;
+    color: #a8c46a;
+    opacity: 0;
+    transform: scale(0.3) rotate(-45deg);
+    transition: opacity 0.3s ease, transform 0.45s cubic-bezier(.2,1.8,.5,1);
+    transition-delay: 0s;
+  }
+  body.dark .spk { color: #c4dd86; }
+  .spk.spk1 { margin-left: 7px; font-size: 0.9em; }
+  .spk.spk2 { margin-left: 2px; font-size: 0.5em; vertical-align: top; }
+  .sparkle-wrap:hover .spk { opacity: 1; transform: scale(1) rotate(0deg); }
+  .sparkle-wrap:hover .spk1 { transition-delay: 0.04s; }
+  .sparkle-wrap:hover .spk2 { transition-delay: 0.24s; }
 
   /* ─── Case study grid ─────────────────────────────────── */
   .grid {
@@ -648,7 +788,8 @@
     .theme-toggle { width: 34px; height: 34px; }
     main { padding: 140px 20px 60px; }
     .hero { margin-bottom: 70px; }
-    .hero p { font-size: 17px; }
+    .hero .intro { font-size: clamp(30px, 9vw, 44px); }
+    .hero .headline { font-size: 16px; line-height: 1.55; letter-spacing: -0.004em; white-space: normal; max-width: none; }
     .grid { grid-template-columns: 1fr; gap: 56px; }
     .card.solo { max-width: 100%; }
     .card h3 { font-size: 26px; }
@@ -688,15 +829,34 @@
 
   <main>
     <section class="hero">
-      <h1>emily jeng</h1>
-      <p class="tagline">Designing useful products grounded in human behavior &amp; <span class="intuitive" id="intuitive" aria-label="intuitive interaction"></span></p>
-      <p class="skills">
-        <span class="item">Interaction Design</span>
-        <span class="sep">·</span>
-        <span class="item">Scalable Systems</span>
-        <span class="sep">·</span>
-        <span class="delight" id="delight" aria-label="Sparking moments of delight"></span>
-      </p>
+      <div class="intro">emily jeng<span class="teacup-wrap" id="teacup">
+          <button type="button" class="teacup" id="teacupBtn" aria-label="what's brewing? pick a drink" aria-haspopup="true">
+            <svg viewBox="0 0 32 22" aria-hidden="true">
+              <defs>
+                <clipPath id="cupInside">
+                  <path d="M6,11.6 L19,11.6 L19,15.3 Q19,19.3 15,19.3 L10,19.3 Q6,19.3 6,15.3 Z"></path>
+                </clipPath>
+              </defs>
+              <rect class="cup-liquid" x="5" y="11" width="15" height="9" clip-path="url(#cupInside)"></rect>
+              <path class="cup-stroke" d="M4.5,7.3 L20.5,7.3 L20.5,15.5 Q20.5,20.6 15.5,20.6 L9.5,20.6 Q4.5,20.6 4.5,15.5 Z"></path>
+              <path class="cup-stroke" d="M20.5,10 Q25,10 25,13.3 Q25,16.4 20.3,16"></path>
+              <g class="steam">
+                <path class="wisp w2" d="M10,3.5 C9.5,1.3 10.5,0.1 10,-2"></path>
+                <path class="wisp w1" d="M12.5,3.2 C12,1.6 13,0.8 12.5,-0.5"></path>
+                <path class="wisp w3" d="M15,3.5 C14.5,1.3 15.5,0.1 15,-2"></path>
+              </g>
+            </svg>
+          </button>
+          <div class="brew-bubble" id="brewBubble" role="dialog" aria-label="pick a drink">
+            <span class="brew-q">what's brewing?</span>
+            <div class="brew-options">
+              <button type="button" data-tea="matcha"><span class="swatch" style="background:#9bbb59"></span>matcha</button>
+              <button type="button" data-tea="hojicha"><span class="swatch" style="background:#a86a40"></span>hojicha</button>
+              <button type="button" data-tea="coffee"><span class="swatch" style="background:#5e3a22"></span>coffee</button>
+            </div>
+          </div>
+        </span></div>
+      <h1 class="headline" style="font-size: 20px">Product designer blending <span class="think-wrap"><strong><span class="slant">human</span> <span class="slant">behavior</span></strong><span class="thoughts" aria-hidden="true"><span class="tdot d1"></span><span class="tdot d2"></span><span class="tcloud"><svg viewBox="0 0 64 44"><defs><linearGradient id="cloudGrad" gradientUnits="userSpaceOnUse" x1="32" y1="2" x2="32" y2="42"><stop offset="0" stop-color="#ffffff"></stop><stop offset="0.65" stop-color="#ffffff"></stop><stop offset="1" stop-color="#e8e8e1"></stop></linearGradient></defs><g class="cloud-shadow" transform="translate(0,2.4)"><circle cx="18" cy="27" r="12"></circle><circle cx="33" cy="17" r="15"></circle><circle cx="47" cy="26" r="12"></circle><circle cx="32" cy="31" r="13"></circle></g><g class="cloud-body"><circle cx="18" cy="27" r="12"></circle><circle cx="33" cy="17" r="15"></circle><circle cx="47" cy="26" r="12"></circle><circle cx="32" cy="31" r="13"></circle></g></svg></span></span></span> and <strong class="intuitive" id="intuitive" aria-label="intuitive interaction"></strong><br>to craft <span class="sparkle-wrap"><span class="slant">delightful</span> <span class="slant">experiences</span><span class="spk spk1" aria-hidden="true">✦</span><span class="spk spk2" aria-hidden="true">✦</span></span></h1>
     </section>
 
     <section id="work">
@@ -890,9 +1050,8 @@
   /* ─── Scroll reveal: stagger groups, observe to add .in ─── */
   (function setupReveal() {
     const groups = [
-      { sel: '.hero h1', step: 60 },
-      { sel: '.hero .tagline', step: 60 },
-      { sel: '.hero .skills', step: 60 },
+      { sel: '.hero .intro', step: 60 },
+      { sel: '.hero .headline', step: 60 },
       { sel: '.grid .card', step: 90 },
       { sel: '.about-hero > *', step: 80 },
       { sel: '.off-paper > *', step: 80 },
@@ -959,81 +1118,74 @@
     loop();
   })();
 
-  /* ─── Build "Sparking moments of delight" + proximity color ─── */
-  function splitChars(host, text) {
-    for (const c of text) {
-      const s = document.createElement('span');
-      if (c === ' ') { s.className = 'ch space'; s.textContent = '\u00A0'; }
-      else { s.className = 'ch'; s.textContent = c; }
-      host.appendChild(s);
-    }
-  }
-
-  const delight = document.getElementById('delight');
-  splitChars(delight, 'Sparking moments of delight');
-  const spark = document.createElement('span');
-  spark.className = 'spark';
-  spark.textContent = '✦';
-  delight.appendChild(spark);
-
-  const delightChs = [...delight.querySelectorAll('.ch')];
-  function proximityColors(ev) {
-    delight.classList.add('active');
-    const x = ev.clientX;
-    const isDark = document.body.classList.contains('dark');
-    // base (faint ink) → hot (matcha)
-    const base = isDark ? [85, 85, 80]    : [184, 184, 178];
-    const hot  = isDark ? [196, 221, 134] : [125, 156, 74];
-    const RANGE = 70;
-    delightChs.forEach((ch) => {
-      if (ch.classList.contains('space')) return;
-      const r = ch.getBoundingClientRect();
-      const cx = r.left + r.width / 2;
-      const d  = Math.abs(cx - x);
-      const t  = Math.max(0, Math.min(1, 1 - d / RANGE));
-      const rr = Math.round(base[0] + (hot[0] - base[0]) * t);
-      const gg = Math.round(base[1] + (hot[1] - base[1]) * t);
-      const bb = Math.round(base[2] + (hot[2] - base[2]) * t);
-      ch.style.color = `rgb(${rr},${gg},${bb})`;
-    });
-  }
-  function clearProximity() {
-    delight.classList.remove('active');
-    delightChs.forEach((ch) => { ch.style.color = ''; });
-  }
-  delight.addEventListener('mousemove', proximityColors);
-  delight.addEventListener('mouseenter', proximityColors);
-  delight.addEventListener('mouseleave', clearProximity);
-
   /* ─── "intuitive interaction" — letters lean toward cursor ─── */
-  const intuitive = document.getElementById('intuitive');
-  splitChars(intuitive, 'intuitive interaction');
-  const intuChs = [...intuitive.querySelectorAll('.ch')];
-  function leanLetters(ev) {
-    const x = ev.clientX;
-    const y = ev.clientY;
-    const REACH = 90;
-    intuChs.forEach((ch) => {
-      if (ch.classList.contains('space')) { ch.style.transform = ''; return; }
-      const r = ch.getBoundingClientRect();
-      const cx = r.left + r.width / 2;
-      const cy = r.top + r.height / 2;
-      const dx = x - cx;
-      const dy = y - cy;
-      const d  = Math.hypot(dx, dy);
-      const t  = Math.max(0, Math.min(1, 1 - d / REACH));
-      const tx = (dx / Math.max(1, d)) * 6 * t;
-      const ty = (dy / Math.max(1, d)) * 4 * t - 4 * t;
-      const rot = (dx / 8) * t;
-      ch.style.transform = `translate(${tx}px, ${ty}px) rotate(${rot}deg)`;
+  function buildPhrase(host, text) {
+    host.textContent = '';
+    const words = text.split(' ');
+    words.forEach((w, wi) => {
+      const word = document.createElement('span');
+      word.className = 'lean-word';
+      for (const c of w) {
+        const s = document.createElement('span');
+        s.className = 'ch';
+        s.textContent = c;
+        word.appendChild(s);
+      }
+      host.appendChild(word);
+      if (wi < words.length - 1) host.appendChild(document.createTextNode(' '));
     });
   }
-  function settleLetters() {
-    intuChs.forEach((ch) => { ch.style.transform = ''; });
+
+  const intuitive = document.getElementById('intuitive');
+  if (intuitive) {
+    buildPhrase(intuitive, 'intuitive interaction');
+    const intuChs = [...intuitive.querySelectorAll('.ch')];
+    const leanLetters = (ev) => {
+      const x = ev.clientX, y = ev.clientY, REACH = 64;
+      intuChs.forEach((ch) => {
+        const r = ch.getBoundingClientRect();
+        const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+        const dx = x - cx, dy = y - cy, d = Math.hypot(dx, dy);
+        const t = Math.max(0, Math.min(1, 1 - d / REACH));
+        const tx = (dx / Math.max(1, d)) * 4 * t;
+        const ty = (dy / Math.max(1, d)) * 3 * t - 3 * t;
+        const rot = (dx / 10) * t;
+        ch.style.transform = `translate(${tx}px, ${ty}px) rotate(${rot}deg)`;
+      });
+    };
+    const settleLetters = () => intuChs.forEach((ch) => { ch.style.transform = ''; });
+    intuitive.addEventListener('mousemove', leanLetters);
+    intuitive.addEventListener('mouseenter', leanLetters);
+    intuitive.addEventListener('mouseleave', settleLetters);
   }
-  intuitive.addEventListener('mousemove', leanLetters);
-  intuitive.addEventListener('mouseenter', leanLetters);
-  intuitive.addEventListener('mouseleave', settleLetters);
+
+  /* ─── Tea cup: hover bubble → tea options → fill cup ─── */
+  (function setupTeacup() {
+    const wrap = document.getElementById('teacup');
+    if (!wrap) return;
+    const btn = wrap.querySelector('.teacup');
+    const svg = btn.querySelector('svg');
+    const liquid = svg.querySelector('.cup-liquid');
+    const teaColors = { matcha: '#9bbb59', hojicha: '#a86a40', coffee: '#5e3a22' };
+    let open = false;
+    const showBubble = () => wrap.classList.add('show-bubble');
+    const hideBubble = () => { if (!open) wrap.classList.remove('show-bubble'); };
+    const openOptions = () => { open = true; wrap.classList.add('open', 'show-bubble'); };
+    const closeOptions = () => { open = false; wrap.classList.remove('open', 'show-bubble'); };
+    wrap.addEventListener('mouseenter', () => { if (!open) showBubble(); });
+    wrap.addEventListener('mouseleave', hideBubble);
+    btn.addEventListener('click', (e) => { e.stopPropagation(); open ? closeOptions() : openOptions(); });
+    wrap.querySelector('.brew-q').addEventListener('click', (e) => { e.stopPropagation(); openOptions(); });
+    wrap.querySelectorAll('.brew-options button').forEach((b) => {
+      b.addEventListener('click', (e) => {
+        e.stopPropagation();
+        liquid.style.fill = teaColors[b.dataset.tea];
+        svg.classList.add('filled');
+        closeOptions();
+      });
+    });
+    document.addEventListener('click', () => { if (open) closeOptions(); });
+  })();
 
   const logo = document.getElementById('logo');
   const logoImg = logo.querySelector('img');
